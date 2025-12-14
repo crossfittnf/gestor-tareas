@@ -1,0 +1,218 @@
+.schedule-page {
+    min-height: 100vh;
+    background-color: #f9fafb;
+}
+
+@media (prefers-color-scheme: dark) {
+    .schedule-page {
+        background-color: #000000;
+    }
+}
+
+.schedule-header {
+    background-color: var(--card-bg);
+    border-bottom: 2px solid var(--primary);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: var(--shadow-sm);
+}
+
+.header-content {
+    padding: 1rem 0;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    color: var(--foreground);
+    border: 1px solid var(--border);
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.back-button:hover {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.schedule-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--foreground);
+    margin: 0;
+}
+
+.schedule-main {
+    padding: 2rem 1rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.schedule-grid-wrapper {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-grid {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    min-width: 900px;
+    font-size: 1rem;
+}
+
+.schedule-grid th,
+.schedule-grid td {
+    border: 2px solid var(--border);
+    padding: 3rem 1.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.shift-header,
+.day-header {
+    background-color: var(--primary);
+    /* Corporate Red */
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem;
+    height: 60px;
+    /* Uniform header height */
+    vertical-align: middle;
+}
+
+.shift-header {
+    background-color: #171717;
+    /* Keep shift header dark or change? User said "color of days". Shifts are rows now? No, shift column removed? */
+    /* Wait, I removed the shift column in previous turn! .shift-header might not be used or only for top-left?
+       Ah, the previous turn removed the first TH. So only .day-header remains effectively.
+       But I should update the rule anyway.
+    */
+    display: none;
+    /* Hide if still present */
+}
+
+/* ... existing styles ... */
+
+.schedule-cell {
+    height: 1px;
+    /* Trick to allow child to fill 100% height of the cell */
+    background-color: var(--card-bg);
+    padding: 0 !important;
+    /* Force no padding */
+    position: relative;
+    vertical-align: top;
+}
+
+.disabled-cell {
+    background-color: #f9fafb;
+    background-image: repeating-linear-gradient(45deg,
+            transparent,
+            transparent 10px,
+            rgba(0, 0, 0, 0.03) 10px,
+            rgba(0, 0, 0, 0.03) 20px);
+}
+
+@media (prefers-color-scheme: dark) {
+    .disabled-cell {
+        background-color: #0a0a0a;
+        background-image: repeating-linear-gradient(45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.03) 10px,
+                rgba(255, 255, 255, 0.03) 20px);
+    }
+}
+
+.employee-cell {
+    width: 100%;
+    height: 100%;
+    min-height: 10rem;
+    display: flex;
+    flex-direction: column;
+    /* Stack name and time vertically */
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.125rem;
+    color: #0a0a0a;
+    padding: 1rem;
+    /* Added padding inside cell */
+    transition: all 0.2s;
+    gap: 0.5rem;
+    /* Gap between name and time */
+}
+
+.employee-cell:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+}
+
+.employee-name {
+    font-size: 1.25rem;
+    text-transform: capitalize;
+}
+
+.employee-time {
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .employee-name {
+        font-size: 1rem;
+    }
+
+    .employee-time {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .schedule-title {
+        font-size: 1.125rem;
+    }
+
+    .schedule-grid {
+        font-size: 0.875rem;
+    }
+
+    .schedule-grid th,
+    .schedule-grid td {
+        padding: 0.75rem;
+    }
+
+    .shift-header,
+    .day-header {
+        padding: 1rem;
+        font-size: 0.875rem;
+    }
+
+    .employee-cell {
+        font-size: 0.875rem;
+        padding: 0.75rem;
+        min-height: 4rem;
+    }
+
+    .shift-label {
+        font-size: 1rem;
+    }
+
+    .shift-time {
+        font-size: 0.75rem;
+    }
+}
