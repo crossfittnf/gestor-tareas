@@ -95,3 +95,25 @@ export async function getDayLog(date: string, username: string): Promise<DayLog 
     }
     return null;
 }
+
+// ===== SHOPPING LIST SERVICE =====
+
+export interface ShoppingList {
+    items: string[];
+}
+
+export function subscribeToShoppingList(onUpdate: (items: string[]) => void) {
+    const docRef = doc(db, 'general', 'shopping');
+    return onSnapshot(docRef, (snapshot) => {
+        if (snapshot.exists()) {
+            onUpdate(snapshot.data().items || []);
+        } else {
+            onUpdate([]);
+        }
+    });
+}
+
+export async function updateShoppingList(items: string[]) {
+    const docRef = doc(db, 'general', 'shopping');
+    await setDoc(docRef, { items }, { merge: true });
+}

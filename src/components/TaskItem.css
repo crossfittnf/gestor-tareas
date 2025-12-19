@@ -18,11 +18,7 @@
     opacity: 0.8;
 }
 
-@media (prefers-color-scheme: dark) {
-    .task-item.completed {
-        background-color: #18181b;
-    }
-}
+
 
 .task-header {
     display: flex;
@@ -123,12 +119,7 @@
     font-size: 0.75rem;
 }
 
-@media (prefers-color-scheme: dark) {
-    .explanation-content {
-        background-color: rgba(220, 38, 38, 0.1);
-        border-color: rgba(220, 38, 38, 0.3);
-    }
-}
+
 
 .explanation-content strong {
     display: block;

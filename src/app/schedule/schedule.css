@@ -126,16 +126,7 @@
             rgba(0, 0, 0, 0.03) 20px);
 }
 
-@media (prefers-color-scheme: dark) {
-    .disabled-cell {
-        background-color: #0a0a0a;
-        background-image: repeating-linear-gradient(45deg,
-                transparent,
-                transparent 10px,
-                rgba(255, 255, 255, 0.03) 10px,
-                rgba(255, 255, 255, 0.03) 20px);
-    }
-}
+
 
 .employee-cell {
     width: 100%;

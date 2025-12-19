@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Task, MOCK_TASKS, ShiftType, SHIFT_LABELS } from '@/lib/mockData';
-import { isUserWorkingToday, getUserShiftToday } from '@/lib/scheduleData';
-import { subscribeToUserDay, updateTaskStatus } from '@/services/taskService'; // New Import
+import { User, Task, MOCK_TASKS, ShiftType, SHIFT_LABELS, MOCK_USERS } from '@/lib/mockData';
+import { isUserWorkingToday, getUserShiftToday, getCurrentDayOfWeek, getMorningEmployeeName } from '@/lib/scheduleData';
+import { subscribeToUserDay, updateTaskStatus, DayLog } from '@/services/taskService';
 import TaskItem from '@/components/TaskItem';
+import ShoppingBlackboard from '@/components/ShoppingBlackboard';
 import Link from 'next/link';
-import './dashboard.css';
 import AdminDashboard from '@/components/AdminDashboard';
 import './dashboard.css';
 
@@ -17,6 +17,10 @@ export default function DashboardPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [selectedShift, setSelectedShift] = useState<ShiftType | null>(null);
     const [isWorking, setIsWorking] = useState<boolean>(false);
+
+    // Morning Shift Summary Logic
+    const [morningUser, setMorningUser] = useState<User | null>(null);
+    const [morningLog, setMorningLog] = useState<DayLog | null>(null);
 
     useEffect(() => {
         // Check authentication
@@ -41,14 +45,13 @@ export default function DashboardPage() {
             const baseTasks = MOCK_TASKS;
             setTasks(baseTasks);
 
-            // Subscribe to Firestore for Real-time Status
             const todayStr = new Date().toISOString().split('T')[0];
 
-            const unsub = subscribeToUserDay(todayStr, currentUser.username, (data) => {
+            // 1. Subscribe to OWN tasks
+            const unsubOwn = subscribeToUserDay(todayStr, currentUser.username, (data) => {
                 if (data && data.tasks) {
-                    // Merge cloud status into local tasks
                     setTasks(prevTasks => prevTasks.map(t => {
-                        const cloudStatus = data.tasks[t.id];
+                        const cloudStatus = data.tasks[t.id]; // Access using 'tasks' property from Firestore
                         if (cloudStatus) {
                             return {
                                 ...t,
@@ -61,7 +64,26 @@ export default function DashboardPage() {
                 }
             });
 
-            return () => unsub();
+            // 2. If Afternoon shift, subscribe to MORNING tasks
+            let unsubMorning = () => { };
+            if (todayShift === 'afternoon') {
+                const dayOfWeek = getCurrentDayOfWeek();
+                const morningUsername = getMorningEmployeeName(dayOfWeek);
+
+                if (morningUsername) {
+                    const mUser = MOCK_USERS.find(u => u.username === morningUsername);
+                    setMorningUser(mUser || null);
+
+                    unsubMorning = subscribeToUserDay(todayStr, morningUsername, (data) => {
+                        setMorningLog(data);
+                    });
+                }
+            }
+
+            return () => {
+                unsubOwn();
+                unsubMorning();
+            };
         }
     }, [router]);
 
@@ -83,7 +105,6 @@ export default function DashboardPage() {
                 await updateTaskStatus(todayStr, user.username, id, { completed });
             } catch (e) {
                 console.error("Failed to sync task", e);
-                // Revert on error? For now, keep optimistic.
             }
         }
     };
@@ -104,135 +125,298 @@ export default function DashboardPage() {
         }
     };
 
+    // Admin View Toggle
+    const [viewMode, setViewMode] = useState<'employee' | 'admin'>('employee');
+
+    // Calculate stats for current user
+    // Filter tasks based on shift!
+    const filteredTasks = selectedShift
+        ? tasks.filter(t => t.shift === selectedShift)
+        : [];
+
+    const totalTasks = filteredTasks.length;
+    const completedTasks = filteredTasks.filter(t => t.completed).length;
+    const progressPercentage = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100;
+
+    // Calculate stats for morning user (if available)
+    let morningStats = { total: MOCK_TASKS.length, completed: 0, percentage: 0 };
+    let morningCompletedTasks: Task[] = [];
+    let morningPendingTasks: Task[] = [];
+    let morningObservations: { taskTitle: string, text: string }[] = [];
+
+    if (morningUser && morningLog && morningLog.tasks) {
+        const morningShiftTasks = MOCK_TASKS.filter(t => t.shift === 'morning');
+        morningStats.total = morningShiftTasks.length;
+
+        morningShiftTasks.forEach(task => {
+            const status = morningLog!.tasks[task.id];
+            const isCompleted = status?.completed ?? false;
+
+            if (isCompleted) {
+                morningCompletedTasks.push(task);
+            } else {
+                morningPendingTasks.push(task);
+            }
+
+            if (status?.observations) {
+                morningObservations.push({
+                    taskTitle: task.title,
+                    text: status.observations
+                });
+            }
+        });
+
+        const completedCount = morningCompletedTasks.length;
+        morningStats.completed = completedCount;
+        morningStats.percentage = morningStats.total === 0 ? 0 : (completedCount / morningStats.total) * 100;
+    }
+
     // Determine if current user is admin
     const isAdmin = user?.role === 'admin';
 
-
-    if (!user) return null;
-
-    // If not working today, show message (UNLESS ADMIN)
-    if (!isWorking && !isAdmin) {
+    // If Admin is in 'admin' mode
+    if (isAdmin && viewMode === 'admin' && user) {
         return (
-            <div className="dashboard-page">
+            <main className="dashboard-page">
                 <header className="dashboard-header">
-                    <div className="container header-content">
+                    {/* Simplified Header for Admin View */}
+                    <div className="header-content">
                         <div className="header-info">
-                            <h1 className="header-title">Gestor de Tareas</h1>
-                            <p className="header-subtitle">Hola, {user.name}</p>
+                            <h1 className="header-title">Panel de Administración</h1>
                         </div>
                         <div className="header-actions">
-                            <Link href="/schedule" className="header-link">
-                                Ver Horario Semanal
-                            </Link>
+                            {/* Toggle Button */}
+                            {isWorking && (
+                                <button onClick={() => setViewMode('employee')} className="header-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)' }}>
+                                    ← Ir a mis tareas
+                                </button>
+                            )}
+                            <button onClick={handleLogout} className="logout-button">
+                                Salir
+                            </button>
+                        </div>
+                    </div>
+                </header>
+                <div style={{ marginTop: '1rem' }}>
+                    <AdminDashboard currentUser={user} />
+                </div>
+            </main>
+        );
+    }
+
+    if (!isWorking && !isAdmin) {
+        return (
+            <main className="dashboard-page">
+                <header className="dashboard-header">
+                    <div className="header-content">
+                        <div className="header-info">
+                            <h1 className="header-title">Panel de Control</h1>
+                            <p className="header-subtitle">Bienvenido, {user?.name}</p>
+                        </div>
+                        <div className="header-actions">
                             <button onClick={handleLogout} className="logout-button">
                                 Cerrar Sesión
                             </button>
                         </div>
                     </div>
                 </header>
-
-                <main className="dashboard-main container">
+                <div className="dashboard-main">
                     <div className="not-working-message">
                         <div className="not-working-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <path d="M12 6v6l4 2" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                         </div>
-                        <h2 className="not-working-title">Hoy no trabajas</h2>
+                        <h2 className="not-working-title">No tienes turno hoy</h2>
                         <p className="not-working-text">
-                            Según el horario semanal, hoy tienes el día libre. ¡Disfruta tu descanso!
+                            Hoy no apareces en el cuadrante de trabajo.
+                            Si crees que es un error, contacta con administración.
                         </p>
-                        <Link href="/schedule" className="btn btn-primary">
-                            Ver Horario Completo
+                        <Link href="/schedule" className="button-primary" style={{ display: 'inline-block', color: 'var(--primary)', fontWeight: 'bold' }}>
+                            Ver Horario Semanal
                         </Link>
                     </div>
-                </main>
-            </div>
+                </div>
+            </main>
         );
     }
 
-    // Filter tasks by selected shift and full-day tasks for current user view
-    const filteredTasks = selectedShift
-        ? tasks.filter(t => t.shift === selectedShift || t.shift === 'full-day')
-        : [];
-
-    const completedCount = filteredTasks.filter(t => t.completed).length;
-    const progress = filteredTasks.length > 0
-        ? Math.round((completedCount / filteredTasks.length) * 100)
-        : 0;
+    // Fallback for Admin who isn't working but is in 'employee' mode inadvertently?
+    // Reset to admin if not working and admin
+    if (isAdmin && !isWorking && viewMode === 'employee') {
+        // Force admin mode? better to handle in effect, but here works for render
+        // Actually, if they are admin, they can see admin interface.
+        // Let's just show Admin interface above if not working.
+        // But the condition above handles (isAdmin && viewMode === 'admin').
+        // So here we are if isAdmin && viewMode === 'employee' && !isWorking.
+        // Just show "Not Working" with a button to go back to Admin.
+    }
 
     return (
-        <div className="dashboard-page">
-            {/* Header */}
+        <main className="dashboard-page">
             <header className="dashboard-header">
-                <div className="container header-content">
+                <div className="header-shift-badge">
+                    Turno: {selectedShift ? SHIFT_LABELS[selectedShift] : '...'}
+                </div>
+                <div className="header-content">
                     <div className="header-info">
-                        <h1 className="header-title">Gestor de Tareas</h1>
-                        <p className="header-subtitle">Hola, {user.name} {isAdmin && '(Administrador)'}</p>
+                        <h1 className="header-title">{user?.name}</h1>
+                        <p className="header-subtitle">Panel de Empleado</p>
                     </div>
-                    {/* Shift badge in header (only if working today) */}
-                    {selectedShift && (
-                        <div className="header-shift-badge">
-                            {SHIFT_LABELS[selectedShift]}
-                        </div>
-                    )}
                     <div className="header-actions">
-                        <Link href="/schedule" className="header-link">
-                            Ver Horario Semanal
-                        </Link>
+                        {isAdmin && (
+                            <button onClick={() => setViewMode('admin')} className="header-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                Panel Admin
+                            </button>
+                        )}
+                        <Link href="/schedule" className="header-link">Ver Horario</Link>
                         <button onClick={handleLogout} className="logout-button">
-                            Cerrar Sesión
+                            Salir
                         </button>
                     </div>
                 </div>
             </header>
 
-            {isAdmin && (
-                <div className="container" style={{ marginTop: '2rem' }}>
-                    <AdminDashboard currentUser={user} />
-                </div>
-            )}
+            <div className="dashboard-main">
+                <div className="dashboard-layout">
+                    <div className="dashboard-tasks-main">
+                        {/* Morning Summary Widget (Only for Afternoon Shift) */}
+                        {selectedShift === 'afternoon' && morningUser && (
+                            <div className="morning-summary-card">
+                                <div className="morning-summary-header">
+                                    <h3 className="morning-summary-title">Resumen Turno Mañana ({morningUser.name})</h3>
+                                </div>
 
-            <main className="dashboard-main container">
+                                <div className="morning-summary-grid">
+                                    <div className="morning-column completed">
+                                        <h4 className="morning-column-title">Realizadas ✅</h4>
+                                        {morningCompletedTasks.length > 0 ? (
+                                            <ul className="morning-task-list">
+                                                {morningCompletedTasks.map(t => (
+                                                    <li key={t.id} className="morning-task-item">{t.title}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="morning-empty-text">Ninguna completada</p>
+                                        )}
+                                    </div>
 
-                {/* Progress Section */}
-                <div className="progress-section">
-                    <div className="progress-header">
-                        <h2 className="progress-title">
-                            Tareas de Hoy
-                        </h2>
-                        <span className="progress-text">
-                            {completedCount} de {filteredTasks.length} completadas
-                        </span>
-                    </div>
-                    <div className="progress-bar-container">
-                        <div
-                            className="progress-bar-fill"
-                            style={{ width: `${progress}%` }}
-                        ></div>
-                    </div>
-                </div>
+                                    <div className="morning-column pending">
+                                        <h4 className="morning-column-title">Pendientes ⏳</h4>
+                                        {morningPendingTasks.length > 0 ? (
+                                            <ul className="morning-task-list">
+                                                {morningPendingTasks.map(t => (
+                                                    <li key={t.id} className="morning-task-item">{t.title}</li>
+                                                ))}
+                                            </ul>
+                                        ) : (
+                                            <p className="morning-empty-text">Todo completado</p>
+                                        )}
+                                    </div>
+                                </div>
 
-                {/* Tasks List */}
-                <div className="tasks-list">
-                    {filteredTasks.map((task, index) => (
-                        <TaskItem
-                            key={task.id}
-                            task={task}
-                            taskNumber={index + 1}
-                            onToggle={handleToggleTask}
-                            onUpdateObservations={handleUpdateObservations}
-                        />
-                    ))}
+                                {morningObservations.length > 0 && (
+                                    <div className="morning-observations-section">
+                                        <h4 className="morning-observations-title">Observaciones</h4>
+                                        <ul className="morning-observations-list">
+                                            {morningObservations.map((obs, idx) => (
+                                                <li key={idx} className="morning-observation-item">
+                                                    <strong>{obs.taskTitle}:</strong> {obs.text}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        )}
 
-                    {filteredTasks.length === 0 && (
-                        <div className="empty-state">
-                            No hay tareas asignadas para este turno.
+                        <div className="progress-section">
+                            <div className="progress-header">
+                                <h2 className="progress-title">Tus Tareas</h2>
+                                <span className="progress-text">
+                                    {completedTasks} de {totalTasks} completadas
+                                </span>
+                            </div>
+                            <div className="progress-bar-container">
+                                <div
+                                    className="progress-bar-fill"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
                         </div>
-                    )}
-                </div>
-            </main>
-        </div>
+
+                        <div className="tasks-list">
+                            {filteredTasks.map((task, index) => (
+                                <TaskItem
+                                    key={task.id}
+                                    task={task}
+                                    taskNumber={index + 1}
+                                    onToggle={handleToggleTask}
+                                    onUpdateObservations={handleUpdateObservations}
+                                />
+                            ))}
+                        </div>
+
+                        {filteredTasks.length === 0 && (
+                            <div className="empty-state">
+                                No hay tareas asignadas para este turno.
+                            </div>
+                        )}
+
+                        <div className="whatsapp-section">
+                            <button
+                                onClick={() => {
+                                    const now = new Date();
+                                    const dateStr = now.toLocaleDateString('es-ES');
+                                    const shiftLabel = selectedShift ? SHIFT_LABELS[selectedShift] : 'Turno';
+
+                                    // Calculate stats
+                                    const pending = filteredTasks.filter(t => !t.completed);
+                                    const obsList = filteredTasks.filter(t => t.observations && t.observations.trim().length > 0);
+
+                                    let message = `📋 *Reporte de Turno - ${user?.name}*\n`;
+                                    message += `📅 Fecha: ${dateStr} - ${shiftLabel}\n\n`;
+                                    message += `✅ *Completadas:* ${completedTasks}/${totalTasks}\n\n`;
+
+                                    if (pending.length > 0) {
+                                        message += `⚠️ *Pendientes:*\n`;
+                                        pending.forEach(t => {
+                                            message += `- ${t.title}\n`;
+                                        });
+                                        message += `\n`;
+                                    } else {
+                                        message += `🎉 *¡Todo completado!*\n\n`;
+                                    }
+
+                                    if (obsList.length > 0) {
+                                        message += `📝 *Observaciones/Incidencias:*\n`;
+                                        obsList.forEach(t => {
+                                            message += `- *${t.title}:* ${t.observations}\n`;
+                                        });
+                                    }
+
+                                    const encodedMessage = encodeURIComponent(message);
+                                    window.open(`https://wa.me/34618289708?text=${encodedMessage}`, '_blank');
+                                }}
+                                className="whatsapp-button"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <path d="M3 21l1.65-3.8a9 9 0 1 1 3.4 2.9L3 21" />
+                                    <path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0v1a5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1" />
+                                </svg>
+                                Enviar Reporte por WhatsApp
+                            </button>
+                        </div>
+                    </div> {/* Close dashboard-tasks-main */}
+
+                    <aside className="dashboard-sidebar">
+                        <ShoppingBlackboard />
+                    </aside>
+                </div> {/* Close dashboard-layout */}
+            </div>
+        </main>
     );
 }

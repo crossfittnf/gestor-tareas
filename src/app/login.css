@@ -49,12 +49,7 @@
     z-index: 1;
 }
 
-@media (prefers-color-scheme: dark) {
-    .login-card {
-        background: rgba(10, 10, 10, 0.98);
-        border: 1px solid rgba(220, 38, 38, 0.3);
-    }
-}
+
 
 .decorative-bar {
     position: absolute;
@@ -115,11 +110,7 @@
     margin-top: 0.75rem;
 }
 
-@media (prefers-color-scheme: dark) {
-    .login-subtitle {
-        color: #a3a3a3;
-    }
-}
+
 
 .login-form {
     margin-top: 2rem;
@@ -146,11 +137,7 @@
     margin-left: 0.25rem;
 }
 
-@media (prefers-color-scheme: dark) {
-    .form-label {
-        color: #fafafa;
-    }
-}
+
 
 .error-message {
     color: #dc2626;
@@ -164,12 +151,7 @@
     animation: fadeInUp 0.3s ease-out;
 }
 
-@media (prefers-color-scheme: dark) {
-    .error-message {
-        background-color: rgba(220, 38, 38, 0.1);
-        border-color: rgba(220, 38, 38, 0.3);
-    }
-}
+
 
 .login-button {
     width: 100%;

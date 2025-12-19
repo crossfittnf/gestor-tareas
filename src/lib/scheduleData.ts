@@ -13,43 +13,43 @@ export interface WeeklySchedule {
     [username: string]: EmployeeSchedule;
 }
 
-// Current week schedule (based on uploaded image - RECEPCIÓN column only)
+// Current week schedule (Updated by User Request)
 export const WEEKLY_SCHEDULE: WeeklySchedule = {
     'javivasco': {
-        'monday': 'morning',      // Lunes mañana (arriba en Recepción)
-        'tuesday': null,          // No trabaja martes
-        'wednesday': 'morning',   // Miércoles mañana (arriba en Recepción)
-        'thursday': null,         // No trabaja jueves
-        'friday': null,           // No trabaja viernes
-        'saturday': null,         // No trabaja sábado
-        'sunday': null,           // No trabaja domingo
+        'monday': 'morning',
+        'tuesday': null,
+        'wednesday': 'morning',
+        'thursday': null,
+        'friday': 'morning',
+        'saturday': null,
+        'sunday': null,
     },
     'ivan': {
-        'monday': 'afternoon',    // Lunes tarde (abajo en Recepción)
-        'tuesday': 'morning',     // Martes mañana (arriba en Recepción)
-        'wednesday': null,        // No trabaja miércoles
-        'thursday': 'morning',    // Jueves mañana (arriba en Recepción)
-        'friday': 'afternoon',    // Viernes tarde (abajo en Recepción)
-        'saturday': null,         // No trabaja sábado
-        'sunday': null,           // No trabaja domingo
+        'monday': null,
+        'tuesday': 'morning',
+        'wednesday': 'afternoon',
+        'thursday': 'morning',
+        'friday': 'afternoon',
+        'saturday': null,
+        'sunday': 'full-day',
     },
     'andres': {
-        'monday': null,           // No trabaja lunes
-        'tuesday': 'afternoon',   // Martes tarde (abajo en Recepción)
-        'wednesday': 'afternoon', // Miércoles tarde (abajo en Recepción)
-        'thursday': null,         // No trabaja jueves
-        'friday': null,           // No trabaja viernes
-        'saturday': 'full-day',   // Sábado completo (en Recepción)
-        'sunday': 'full-day',     // Domingo completo (en Recepción)
+        'monday': null,
+        'tuesday': 'afternoon',
+        'wednesday': null,
+        'thursday': null,
+        'friday': null,
+        'saturday': null,
+        'sunday': null,
     },
     'cristina': {
-        'monday': null,           // No trabaja lunes
-        'tuesday': null,          // No trabaja martes
-        'wednesday': null,        // No trabaja miércoles
-        'thursday': 'afternoon',  // Jueves tarde (abajo en Recepción)
-        'friday': 'morning',      // Viernes mañana (arriba en Recepción)
-        'saturday': null,         // No trabaja sábado
-        'sunday': null,           // No trabaja domingo
+        'monday': 'afternoon',
+        'tuesday': null,
+        'wednesday': null,
+        'thursday': 'afternoon',
+        'friday': null,
+        'saturday': 'full-day',
+        'sunday': null,
     },
 };
 
@@ -87,4 +87,14 @@ export function getUserShiftForDay(username: string, day: DayOfWeek): ShiftType 
     if (!userSchedule) return null;
 
     return userSchedule[day];
+}
+
+// Find who is working in the morning for a specific day
+export function getMorningEmployeeName(day: DayOfWeek): string | null {
+    for (const [username, schedule] of Object.entries(WEEKLY_SCHEDULE)) {
+        if (schedule[day] === 'morning') {
+            return username;
+        }
+    }
+    return null;
 }
