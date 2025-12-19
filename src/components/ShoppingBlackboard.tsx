@@ -124,6 +124,10 @@ export default function ShoppingBlackboard({ onSyncStatusChange }: { onSyncStatu
                     </form>
                 </div>
             </div>
+            {/* Debug Info inside Blackboard */}
+            <div style={{ fontSize: '10px', color: '#666', marginTop: '5px', textAlign: 'center' }}>
+                Cloud Items: {items.length} | Last Upd: {new Date().toLocaleTimeString()}
+            </div>
         </div>
     );
 }
