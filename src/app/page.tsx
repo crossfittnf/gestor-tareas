@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserByUsername, updateUserPassword } from '@/lib/user';
 import { User } from '@/lib/mockData';
-import ConnectionTester from '@/components/ConnectionTester';
 import './login.css';
 
 export default function LoginPage() {
@@ -324,8 +323,6 @@ export default function LoginPage() {
         <p className="footer-text">
           Sistema de gestión interna v1.0
         </p>
-
-        <ConnectionTester />
       </div>
     </main>
   );
