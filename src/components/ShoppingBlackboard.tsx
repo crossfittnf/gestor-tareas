@@ -59,7 +59,15 @@ export default function ShoppingBlackboard({ onSyncStatusChange }: { onSyncStatu
         // 3. Update Cloud
         if (onSyncStatusChange) onSyncStatusChange('syncing');
         try {
-            await updateShoppingList(newItems);
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error("Sync timed out")), 5000)
+            );
+
+            await Promise.race([
+                updateShoppingList(newItems),
+                timeout
+            ]);
+
             if (onSyncStatusChange) onSyncStatusChange('synced');
         } catch (error) {
             console.error("Failed to sync shopping list", error);

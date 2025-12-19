@@ -183,10 +183,19 @@ export default function DashboardPage() {
             currentSaved[id] = { ...currentSaved[id], completed };
             localStorage.setItem(localKey, JSON.stringify(currentSaved));
 
-            // Sync to Cloud
+            // Sync to Cloud with Timeout
             setSyncStatus('syncing');
             try {
-                await updateTaskStatus(todayStr, user.username, id, { completed });
+                // Create a timeout promise
+                const timeout = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Sync timed out")), 5000)
+                );
+
+                await Promise.race([
+                    updateTaskStatus(todayStr, user.username, id, { completed }),
+                    timeout
+                ]);
+
                 setSyncStatus('synced');
             } catch (e) {
                 console.error("Failed to sync task", e);
@@ -212,10 +221,18 @@ export default function DashboardPage() {
             currentSaved[id] = { ...currentSaved[id], observations };
             localStorage.setItem(localKey, JSON.stringify(currentSaved));
 
-            // Sync to Cloud
+            // Sync to Cloud with Timeout
             setSyncStatus('syncing');
             try {
-                await updateTaskStatus(todayStr, user.username, id, { observations });
+                const timeout = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("Sync timed out")), 5000)
+                );
+
+                await Promise.race([
+                    updateTaskStatus(todayStr, user.username, id, { observations }),
+                    timeout
+                ]);
+
                 setSyncStatus('synced');
             } catch (e) {
                 console.error("Failed to sync observations", e);
