@@ -63,6 +63,7 @@ signInAnonymously(auth)
     })
     .catch((err) => {
         console.error("Failed to sign in anonymously", err);
-        // Force token refresh if it fails
-        signOut(auth).then(() => signInAnonymously(auth));
+        if (typeof window !== 'undefined') {
+            (window as any).__AUTH_STATUS__ = `Auth Error: ${err.message}`;
+        }
     });
