@@ -10,6 +10,7 @@ import ShoppingBlackboard from '@/components/ShoppingBlackboard';
 import Link from 'next/link';
 import AdminDashboard from '@/components/AdminDashboard';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
+import { SyncStatus } from '@/components/SyncStatus'; // Import new component
 import './dashboard.css';
 
 export default function DashboardPage() {
@@ -31,6 +32,21 @@ export default function DashboardPage() {
 
     // Dropdown Menu State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // Sync Status State
+    const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
+
+    // Monitor Online/Offline events
+    useEffect(() => {
+        const handleOnline = () => setSyncStatus('synced'); // Optimistic
+        const handleOffline = () => setSyncStatus('error');
+        window.addEventListener('online', handleOnline);
+        window.addEventListener('offline', handleOffline);
+        return () => {
+            window.removeEventListener('online', handleOnline);
+            window.removeEventListener('offline', handleOffline);
+        };
+    }, []);
 
     useEffect(() => {
         const unsub = subscribeToShoppingList((data) => {
@@ -167,11 +183,13 @@ export default function DashboardPage() {
             localStorage.setItem(localKey, JSON.stringify(currentSaved));
 
             // Sync to Cloud
+            setSyncStatus('syncing');
             try {
                 await updateTaskStatus(todayStr, user.username, id, { completed });
+                setSyncStatus('synced');
             } catch (e) {
                 console.error("Failed to sync task", e);
-                // Optional: Show offline toast
+                setSyncStatus('error');
             }
         }
     };
@@ -194,10 +212,13 @@ export default function DashboardPage() {
             localStorage.setItem(localKey, JSON.stringify(currentSaved));
 
             // Sync to Cloud
+            setSyncStatus('syncing');
             try {
                 await updateTaskStatus(todayStr, user.username, id, { observations });
+                setSyncStatus('synced');
             } catch (e) {
                 console.error("Failed to sync observations", e);
+                setSyncStatus('error');
             }
         }
     };
@@ -366,6 +387,7 @@ export default function DashboardPage() {
                         <p className="header-subtitle">Panel de Empleado</p>
                     </div>
                     <div className="header-actions">
+                        <SyncStatus status={syncStatus} />
                         <div className="user-menu-container" style={{ position: 'relative' }}>
                             <button
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -676,7 +698,7 @@ export default function DashboardPage() {
                     </div> {/* Close dashboard-tasks-main */}
 
                     <aside className="dashboard-sidebar">
-                        <ShoppingBlackboard />
+                        <ShoppingBlackboard onSyncStatusChange={setSyncStatus} />
                     </aside>
                 </div> {/* Close dashboard-layout */}
             </div>

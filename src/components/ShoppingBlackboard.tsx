@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { subscribeToShoppingList, updateShoppingList } from '@/services/taskService';
 import './ShoppingBlackboard.css';
 
-export default function ShoppingBlackboard() {
+export default function ShoppingBlackboard({ onSyncStatusChange }: { onSyncStatusChange?: (status: 'synced' | 'syncing' | 'error') => void }) {
     const [items, setItems] = useState<string[]>([]);
     const [newItem, setNewItem] = useState('');
     const [isLoading, setIsLoading] = useState(true);
@@ -57,10 +57,13 @@ export default function ShoppingBlackboard() {
         // 2. Update Local
         localStorage.setItem('offline_shopping_list', JSON.stringify(newItems));
         // 3. Update Cloud
+        if (onSyncStatusChange) onSyncStatusChange('syncing');
         try {
             await updateShoppingList(newItems);
+            if (onSyncStatusChange) onSyncStatusChange('synced');
         } catch (error) {
             console.error("Failed to sync shopping list", error);
+            if (onSyncStatusChange) onSyncStatusChange('error');
         }
     };
 
