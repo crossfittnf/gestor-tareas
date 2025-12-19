@@ -15,7 +15,7 @@ export interface WeeklySchedule {
 
 // Current week schedule (Updated by User Request)
 export const WEEKLY_SCHEDULE: WeeklySchedule = {
-    'javivasco': {
+    'Javivasco': {
         'monday': 'morning',
         'tuesday': null,
         'wednesday': 'morning',
@@ -24,7 +24,7 @@ export const WEEKLY_SCHEDULE: WeeklySchedule = {
         'saturday': null,
         'sunday': null,
     },
-    'ivan': {
+    'Ivan': {
         'monday': null,
         'tuesday': 'morning',
         'wednesday': 'afternoon',
@@ -33,7 +33,7 @@ export const WEEKLY_SCHEDULE: WeeklySchedule = {
         'saturday': null,
         'sunday': 'full-day',
     },
-    'andres': {
+    'Andres': {
         'monday': null,
         'tuesday': 'afternoon',
         'wednesday': null,
@@ -42,7 +42,7 @@ export const WEEKLY_SCHEDULE: WeeklySchedule = {
         'saturday': null,
         'sunday': null,
     },
-    'cristina': {
+    'Cristina': {
         'monday': 'afternoon',
         'tuesday': null,
         'wednesday': null,

@@ -16,14 +16,16 @@ export interface User {
     username: string;
     name: string;
     role: 'employee' | 'admin';
+    password?: string; // Optional for now, will be used for initialization/fallback
+    requiresPasswordChange?: boolean;
 }
 
 // Real employees from Tnf Box
 export const MOCK_USERS: User[] = [
-    { id: '1', username: 'javivasco', name: 'Javi Vasco', role: 'admin' },
-    { id: '2', username: 'ivan', name: 'Ivan', role: 'employee' },
-    { id: '3', username: 'andres', name: 'Andres', role: 'employee' },
-    { id: '4', username: 'cristina', name: 'Cristina', role: 'employee' },
+    { id: '1', username: 'Javivasco', name: 'Javi Vasco', role: 'admin', password: 'Javivasco', requiresPasswordChange: true },
+    { id: '2', username: 'Ivan', name: 'Ivan', role: 'employee', password: 'Ivan', requiresPasswordChange: true },
+    { id: '3', username: 'Andres', name: 'Andres', role: 'employee', password: 'Andres', requiresPasswordChange: true },
+    { id: '4', username: 'Cristina', name: 'Cristina', role: 'employee', password: 'Cristina', requiresPasswordChange: true },
 ];
 
 const today = new Date().toISOString().split('T')[0];

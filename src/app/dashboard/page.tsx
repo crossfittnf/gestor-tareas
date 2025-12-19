@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Task, MOCK_TASKS, ShiftType, SHIFT_LABELS, MOCK_USERS } from '@/lib/mockData';
 import { isUserWorkingToday, getUserShiftToday, getCurrentDayOfWeek, getMorningEmployeeName } from '@/lib/scheduleData';
-import { subscribeToUserDay, updateTaskStatus, DayLog } from '@/services/taskService';
+import { subscribeToUserDay, updateTaskStatus, DayLog, subscribeToShoppingList } from '@/services/taskService';
 import TaskItem from '@/components/TaskItem';
 import ShoppingBlackboard from '@/components/ShoppingBlackboard';
 import Link from 'next/link';
 import AdminDashboard from '@/components/AdminDashboard';
+import ChangePasswordModal from '@/components/ChangePasswordModal';
 import './dashboard.css';
 
 export default function DashboardPage() {
@@ -21,6 +22,19 @@ export default function DashboardPage() {
     // Morning Shift Summary Logic
     const [morningUser, setMorningUser] = useState<User | null>(null);
     const [morningLog, setMorningLog] = useState<DayLog | null>(null);
+
+    // Shopping List Logic
+    const [shoppingList, setShoppingList] = useState<string[]>([]);
+
+    // Change Password Modal
+    const [showPasswordModal, setShowPasswordModal] = useState(false);
+
+    useEffect(() => {
+        const unsub = subscribeToShoppingList((data) => {
+            setShoppingList(data);
+        });
+        return () => unsub();
+    }, []);
 
     useEffect(() => {
         // Check authentication
@@ -200,6 +214,17 @@ export default function DashboardPage() {
                 <div style={{ marginTop: '1rem' }}>
                     <AdminDashboard currentUser={user} />
                 </div>
+                {showPasswordModal && (
+                    <ChangePasswordModal
+                        userId={user.id}
+                        onClose={() => setShowPasswordModal(false)}
+                        onSuccess={() => {
+                            setShowPasswordModal(false);
+                            // Optional: Show a toast/alert
+                            alert('Contraseña actualizada correctamente');
+                        }}
+                    />
+                )}
             </main>
         );
     }
@@ -240,7 +265,18 @@ export default function DashboardPage() {
                         </Link>
                     </div>
                 </div>
-            </main>
+                {showPasswordModal && (
+                    <ChangePasswordModal
+                        userId={user?.id || ''}
+                        onClose={() => setShowPasswordModal(false)}
+                        onSuccess={() => {
+                            setShowPasswordModal(false);
+                            alert('Contraseña actualizada correctamente');
+                        }}
+                    />
+                )
+                }
+            </main >
         );
     }
 
@@ -273,6 +309,9 @@ export default function DashboardPage() {
                             </button>
                         )}
                         <Link href="/schedule" className="header-link">Ver Horario</Link>
+                        <button onClick={() => setShowPasswordModal(true)} className="header-link" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            Contraseña
+                        </button>
                         <button onClick={handleLogout} className="logout-button">
                             Salir
                         </button>
@@ -377,8 +416,9 @@ export default function DashboardPage() {
                                     const pending = filteredTasks.filter(t => !t.completed);
                                     const obsList = filteredTasks.filter(t => t.observations && t.observations.trim().length > 0);
 
-                                    let message = `📋 *Reporte de Turno - ${user?.name}*\n`;
-                                    message += `📅 Fecha: ${dateStr} - ${shiftLabel}\n\n`;
+                                    // Simplified Header
+                                    let message = `� *${user?.name}* | 📅 ${dateStr} | ${shiftLabel}\n\n`;
+
                                     message += `✅ *Completadas:* ${completedTasks}/${totalTasks}\n\n`;
 
                                     if (pending.length > 0) {
@@ -388,11 +428,20 @@ export default function DashboardPage() {
                                         });
                                         message += `\n`;
                                     } else {
-                                        message += `🎉 *¡Todo completado!*\n\n`;
+                                        message += `🎉 *Todo al día*\n\n`;
+                                    }
+
+                                    // Shopping List Section
+                                    if (shoppingList.length > 0) {
+                                        message += `🛒 *Falta comprar:*\n`;
+                                        shoppingList.forEach(item => {
+                                            message += `- ${item}\n`;
+                                        });
+                                        message += `\n`;
                                     }
 
                                     if (obsList.length > 0) {
-                                        message += `📝 *Observaciones/Incidencias:*\n`;
+                                        message += `📝 *Observaciones:*\n`;
                                         obsList.forEach(t => {
                                             message += `- *${t.title}:* ${t.observations}\n`;
                                         });
@@ -417,6 +466,16 @@ export default function DashboardPage() {
                     </aside>
                 </div> {/* Close dashboard-layout */}
             </div>
+            {showPasswordModal && user && (
+                <ChangePasswordModal
+                    userId={user.id}
+                    onClose={() => setShowPasswordModal(false)}
+                    onSuccess={() => {
+                        setShowPasswordModal(false);
+                        alert('Contraseña actualizada correctamente');
+                    }}
+                />
+            )}
         </main>
     );
 }
