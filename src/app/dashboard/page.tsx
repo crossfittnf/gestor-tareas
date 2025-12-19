@@ -146,7 +146,8 @@ export default function DashboardPage() {
 
             // 1. Subscribe to OWN tasks
             // JAVIVASCO: FIXED Argument Order (Date, Username)
-            const unsub = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
+            // Rename back to unsubOwn to match cleanup function
+            const unsubOwn = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
                 if (data) {
                     setTasks(prevTasks => {
                         // ... existing merge logic ...
