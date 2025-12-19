@@ -24,7 +24,9 @@ export function getTasksForDateAndUser(date: string, username: string): Task[] {
     }
 
     // 2. Get base tasks for that shift
-    const baseTasks = MOCK_TASKS.filter(t => t.shift === scheduledShift || t.shift === 'full-day');
+    // JAVIVASCO: FIXED - Strict filtering. Only show tasks for the specific assigned shift.
+    // 'full-day' tasks are for Weekends/Holidays, not to be merged with Morning/Afternoon.
+    const baseTasks = MOCK_TASKS.filter(t => t.shift === scheduledShift);
 
     // 3. Clone and "hydrate" with any stored state (simulating backend persistence)
     // We'll try to find any stored state in localStorage for this specific day/user/task combo
