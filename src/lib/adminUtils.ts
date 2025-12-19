@@ -73,12 +73,15 @@ export function getDayStats(date: string, username: string) {
         let completed = 0;
         const allObs: string[] = [];
 
-        MOCK_USERS.filter(u => u.role !== 'admin').forEach(user => {
+        MOCK_USERS.forEach(user => {
             const tasks = getTasksForDateAndUser(date, user.username);
             total += tasks.length;
             completed += tasks.filter(t => t.completed).length;
             tasks.forEach(t => {
-                if (t.observations) allObs.push(`${user.name}: ${t.observations}`);
+                if (t.observations && t.observations.trim().length > 0) {
+                    // JAVIVASCO: Improved Observation Format -> [User] - [Task]: [Obs]
+                    allObs.push(`${user.name} - ${t.title}: ${t.observations}`);
+                }
             });
         });
 

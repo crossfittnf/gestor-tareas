@@ -81,10 +81,14 @@ export default function TaskItem({ task, taskNumber, onToggle, onUpdateObservati
                     </label>
                     <textarea
                         className="observations-textarea"
-                        placeholder="Escribe aquí cualquier incidencia o comentario sobre la tarea..."
+                        placeholder={
+                            task.id.includes('5') && (task.title.includes('llamadas') || task.title.includes('listados'))
+                                ? "Por favor indica:\n- 14 Days:\n- Seguimiento:"
+                                : "Escribe aquí cualquier incidencia o comentario sobre la tarea..."
+                        }
                         value={task.observations || ''}
                         onChange={(e) => onUpdateObservations(task.id, e.target.value)}
-                        rows={3}
+                        rows={task.id.includes('5') && (task.title.includes('llamadas') || task.title.includes('listados')) ? 4 : 3}
                     />
                 </div>
             )}
