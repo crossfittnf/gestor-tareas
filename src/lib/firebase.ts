@@ -18,9 +18,9 @@ const app = initializeApp(firebaseConfig);
 // JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
 // JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
 // export const db = getFirestore(app);
-// JAVIVASCO: Reverting to Standard WebSockets + Fresh Session
-// export const db = getFirestore(app);
-export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// JAVIVASCO: New Project (3204b) - Trying standard WebSockets first.
+export const db = getFirestore(app);
+// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
