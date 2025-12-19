@@ -14,8 +14,12 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// Standard initialization - Long polling didn't fix timeout, reverting to standard to check baseline
-export const db = getFirestore(app);
+// Use initializeFirestore to force long polling - bypasses firewall blocking WebSockets
+// JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
+export const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+});
+// export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Enable Offline Persistence
@@ -33,11 +37,32 @@ enableIndexedDbPersistence(db).catch((err) => {
 */
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
-console.log("Attempting Anonymous Auth...");
+// JAVIVASCO: Adding global auth listener for debug
+import { onAuthStateChanged } from "firebase/auth";
+
+onAuthStateChanged(auth, (user) => {
+    if (user) {
+        console.log("Global Auth Listener: User is signed in:", user.uid);
+        // We could potentially export a reactive variable here if needed, but console is a start
+        // or set a window variable for the UI to read
+        if (typeof window !== 'undefined') {
+            (window as any).__AUTH_STATUS__ = `Authed: ${user.uid.substring(0, 5)}...`;
+        }
+    } else {
+        console.log("Global Auth Listener: User is signed out");
+        if (typeof window !== 'undefined') {
+            (window as any).__AUTH_STATUS__ = "Not Authenticated";
+        }
+    }
+});
+
 signInAnonymously(auth)
     .then((userCredential) => {
         console.log("Anonymous Auth Success:", userCredential.user.uid);
     })
     .catch((err) => {
         console.error("Failed to sign in anonymously", err);
+        if (typeof window !== 'undefined') {
+            (window as any).__AUTH_STATUS__ = `Auth Error: ${err.message}`;
+        }
     });

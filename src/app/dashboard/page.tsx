@@ -756,7 +756,7 @@ export default function DashboardPage() {
 
                 {/* Debug Info Footer */}
                 <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>
-                    <p>Debug ID: {getTodayDateString()}_{user?.username} | Status: {syncStatus} {lastError && `| Error: ${lastError}`}</p>
+                    <p>Debug ID: {getTodayDateString()}_{user?.username} | Status: {syncStatus} | Auth: {(typeof window !== 'undefined' ? (window as any).__AUTH_STATUS__ : 'Loading...')} {lastError && `| Error: ${lastError}`}</p>
                 </div>
             </div>
             {showPasswordModal && user && (
