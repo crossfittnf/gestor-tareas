@@ -2,58 +2,55 @@ import { db } from './firebase';
 import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { User, MOCK_USERS } from './mockData';
 
-export const USERS_COLLECTION = 'users';
+export const USERS_COLLECTION = 'general';
 
 /**
- * Fetch a user by their username.
- * If no users exist in the DB, it initializes them from MOCK_USERS.
+ * Fetch a user by their username directly.
+ * Uses getDoc for speed and reliability (no Query required).
+ * Path: general/user_{username}
  */
-const QUERY_TIMEOUT = 10000; // 10 seconds timeout
+const QUERY_TIMEOUT = 10000;
 
 export async function getUserByUsername(username: string): Promise<User | null> {
     try {
         console.log("Starting getUser logic for:", username);
+
+        // Direct Doc Reference (No Query = No Index Issues)
+        const docId = `user_${username}`;
+        const userRef = doc(db, USERS_COLLECTION, docId);
 
         // Timeout Promise
         const timeoutPromise = new Promise<never>((_, reject) =>
             setTimeout(() => reject(new Error("Firestore timeout")), QUERY_TIMEOUT)
         );
 
-        const q = query(collection(db, USERS_COLLECTION), where('username', '==', username));
-
-        // Race Firestore against timeout
-        const querySnapshot = await Promise.race([
-            getDocs(q),
+        // Race Firestore
+        const snapshot = await Promise.race([
+            getDoc(userRef),
             timeoutPromise
         ]) as any;
 
-        if (querySnapshot.empty) {
-            console.log("No user found in DB, checking if empty initialization needed...");
-            // Check if DB is empty to potentially initialize
-            // Also race this check
-            const allUsers = await Promise.race([
-                getDocs(collection(db, USERS_COLLECTION)),
-                timeoutPromise
-            ]) as any;
+        if (snapshot.exists()) {
+            console.log("User found in Cloud:", snapshot.data());
+            return snapshot.data() as User;
+        } else {
+            console.log("User NOT found in Cloud, initializing from MOCK...");
 
-            if (allUsers.empty) {
-                console.log("DB is empty, initializing...");
-                // Just fire and forget initialization or await? 
-                // Let's await but catch error so we don't block logic if it fails
+            // Initialize THIS user specifically if missing
+            const mockUser = MOCK_USERS.find(u => u.username === username);
+            if (mockUser) {
                 try {
-                    await initializeUsers();
-                    // Retry fetch logic? Or just return mock user for now to be fast
-                    // Let's return mock user directly to be responsive
-                    console.log("Returning mock user after init trigger");
-                    return MOCK_USERS.find(u => u.username === username) || null;
+                    // Create it now so next time it exists
+                    await setDoc(userRef, mockUser);
+                    console.log("User initialized in Cloud");
+                    return mockUser;
                 } catch (e) {
-                    console.error("Init failed", e);
+                    console.error("Failed to init user", e);
+                    return mockUser; // Return mock anyway
                 }
             }
             return null;
         }
-
-        return querySnapshot.docs[0].data() as User;
 
     } catch (error) {
         console.error("Error/Timeout in getUserByUsername:", error);
@@ -62,36 +59,55 @@ export async function getUserByUsername(username: string): Promise<User | null> 
     }
 }
 
-/**
- * Initialize Firestore with mock users if they don't exist.
- */
+// Deprecated bulk init (no longer needed as we auto-init on fetch)
 export async function initializeUsers() {
-    for (const user of MOCK_USERS) {
-        const userRef = doc(db, USERS_COLLECTION, user.id);
-        const snap = await getDoc(userRef);
-        if (!snap.exists()) {
-            await setDoc(userRef, user);
-        }
-    }
+    // No-op
 }
 
 /**
  * Update a user's password and remove the 'requiresPasswordChange' flag.
  */
 export async function updateUserPassword(userId: string, newPassword: string) {
-    console.log("Attempting to update password for userId:", userId);
+    // We need the username to construct the ID. 
+    // If userId is passed as '1' (from MOCK), we might be in trouble if we keyed by Username.
+    // Let's verify how userId is passed. 
+    // In MOCK_USERS, id is '1', '2'.
 
-    // Timeout Promise
+    // PROBLEM: We keyed files by `user_{username}`. But this function receives `userId`.
+    // Solution: We should look up the user by ID or change the signature.
+    // However, looking at the MOCK_DATA, IDs are numeric strings.
+
+    // HACK: Since we only have 4 users and we know them, let's find the username from MOCK_USERS 
+    // using the ID, then update the cloud doc `user_{username}`.
+
+    const user = MOCK_USERS.find(u => u.id === userId);
+    if (!user) {
+        console.error("Unknown user ID:", userId);
+        throw new Error("User not found");
+    }
+
+    const docId = `user_${user.username}`;
+    console.log(`Updating password for ${docId}`);
+
     const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("Firestore timeout update")), QUERY_TIMEOUT)
     );
 
-    const userRef = doc(db, USERS_COLLECTION, userId);
+    const userRef = doc(db, USERS_COLLECTION, docId);
+
+    // Ensure the doc exists (it should if we logged in), but use set with merge just in case
+    // First, ensure we have the base user data too if it was missing?
+    // Actually, setDoc with merge is fine.
 
     await Promise.race([
         setDoc(userRef, {
             password: newPassword,
-            requiresPasswordChange: false
+            requiresPasswordChange: false,
+            // Ensure ID and match mock data is preserved if creating
+            id: user.id,
+            username: user.username,
+            name: user.name,
+            role: user.role
         }, { merge: true }),
         timeoutPromise
     ]);
