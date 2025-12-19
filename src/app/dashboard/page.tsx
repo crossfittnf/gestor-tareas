@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { User, Task, MOCK_TASKS, ShiftType, SHIFT_LABELS, MOCK_USERS } from '@/lib/mockData';
 import { isUserWorkingToday, getUserShiftToday, getCurrentDayOfWeek, getMorningEmployeeName } from '@/lib/scheduleData';
+import { getTodayDateString } from '@/lib/dateUtils';
 import { subscribeToUserDay, updateTaskStatus, DayLog, subscribeToShoppingList } from '@/services/taskService';
 import TaskItem from '@/components/TaskItem';
 import ShoppingBlackboard from '@/components/ShoppingBlackboard';
@@ -78,7 +79,7 @@ export default function DashboardPage() {
             const baseTasks = MOCK_TASKS;
 
             // 0. Load from LocalStorage (Offline Cache)
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getTodayDateString();
             const localKey = `offline_tasks_${todayStr}_${currentUser.username}`;
             const savedData = localStorage.getItem(localKey);
 
@@ -174,7 +175,7 @@ export default function DashboardPage() {
 
         // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getTodayDateString();
             const localKey = `offline_tasks_${todayStr}_${user.username}`;
 
             // Build a map of changes to save
@@ -203,7 +204,7 @@ export default function DashboardPage() {
 
         // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const todayStr = getTodayDateString();
             const localKey = `offline_tasks_${todayStr}_${user.username}`;
 
             // Build a map of changes to save

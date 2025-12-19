@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User, MOCK_USERS, MOCK_TASKS, Task } from '@/lib/mockData';
 import { getTasksForDateAndUser } from '@/lib/adminUtils';
 import { subscribeToUserDay, DayLog } from '@/services/taskService'; // New Import
+import { getTodayDateString } from '@/lib/dateUtils';
 import './AdminDashboard.css';
 
 interface AdminDashboardProps {
@@ -13,7 +14,7 @@ interface AdminDashboardProps {
 export default function AdminDashboard({ currentUser }: AdminDashboardProps) {
     // State
     const [selectedDate, setSelectedDate] = useState(() => {
-        return new Date().toISOString().split('T')[0];
+        return getTodayDateString();
     });
     const [selectedEmployee, setSelectedEmployee] = useState('all');
 
