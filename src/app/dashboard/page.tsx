@@ -119,8 +119,12 @@ export default function DashboardPage() {
 
             setTasks(initialTasks);
 
+            // Ensure we use the exact date string format YYYY-MM-DD in LOCAL time
+            // We use our helper to guarantee consistency
+            const subscriptionDateStr = getTodayDateString();
+
             // 1. Subscribe to OWN tasks
-            const unsubOwn = subscribeToUserDay(todayStr, currentUser.username, (data) => {
+            const unsubOwn = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
                 if (data && data.tasks) {
                     setTasks(prevTasks => {
                         // ... existing merge logic ...
