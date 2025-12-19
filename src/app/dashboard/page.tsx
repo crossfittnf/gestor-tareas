@@ -56,6 +56,18 @@ export default function DashboardPage() {
         };
     }, []);
 
+    // Safety Timeout: If 'syncing' persists for too long (e.g. initial load hangs), force error
+    useEffect(() => {
+        let timeout: NodeJS.Timeout;
+        if (syncStatus === 'syncing') {
+            timeout = setTimeout(() => {
+                setSyncStatus((prev) => prev === 'syncing' ? 'error' : prev);
+                setLastError((prev) => prev || 'Connection Timeout (Initial)');
+            }, 10000); // 10 seconds grace period
+        }
+        return () => clearTimeout(timeout);
+    }, [syncStatus]);
+
     useEffect(() => {
         const unsub = subscribeToShoppingList((data) => {
             // Merge logic required for Shopping List too?
