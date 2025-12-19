@@ -14,10 +14,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-// Use initializeFirestore to force long polling - bypasses firewall blocking WebSockets
-export const db = initializeFirestore(app, {
-    experimentalForceLongPolling: true,
-});
+// Standard initialization - Long polling didn't fix timeout, reverting to standard to check baseline
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Enable Offline Persistence
