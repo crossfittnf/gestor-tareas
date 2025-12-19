@@ -56,17 +56,19 @@ export default function DashboardPage() {
         };
     }, []);
 
-    // Safety Timeout: If 'syncing' persists for too long (e.g. initial load hangs), force error
+    /* 
+    // JAVIVASCO: Disabling watchdog now that connection is stable. It was causing false negatives.
     useEffect(() => {
         let timeout: NodeJS.Timeout;
         if (syncStatus === 'syncing') {
             timeout = setTimeout(() => {
-                setSyncStatus((prev) => prev === 'syncing' ? 'error' : prev);
-                setLastError((prev) => prev || 'Connection Timeout (Initial)');
-            }, 10000); // 10 seconds grace period
+                 // setSyncStatus((prev) => prev === 'syncing' ? 'error' : prev);
+                 // setLastError((prev) => prev || 'Connection Timeout (Initial)');
+            }, 10000); 
         }
         return () => clearTimeout(timeout);
     }, [syncStatus]);
+    */
 
     useEffect(() => {
         const unsub = subscribeToShoppingList((data) => {

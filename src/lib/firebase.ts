@@ -23,10 +23,7 @@ export const db = initializeFirestore(app, {
 export const auth = getAuth(app);
 
 // Enable Offline Persistence
-// Enable Offline Persistence
-// JAVIVASCO: Disabling persistence temporarily to debug connection hang. 
-// Sometimes multiple tabs with persistence enabled cause a deadlock.
-/*
+// JAVIVASCO: Re-enabling persistence now that Key/Auth is fixed.
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
         console.warn('Persistence failed: Multiple tabs open');
@@ -34,7 +31,6 @@ enableIndexedDbPersistence(db).catch((err) => {
         console.warn('Persistence failed: Browser not supported');
     }
 });
-*/
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
 // JAVIVASCO: Adding global auth listener for debug
