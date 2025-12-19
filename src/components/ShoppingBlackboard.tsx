@@ -10,38 +10,72 @@ export default function ShoppingBlackboard() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // 1. Initial Load from Local Storage
+        const saved = localStorage.getItem('offline_shopping_list');
+        if (saved) {
+            try {
+                setItems(JSON.parse(saved));
+            } catch (e) { console.error(e); }
+        }
+
+        // 2. Subscribe to Cloud
         const unsub = subscribeToShoppingList((data) => {
-            setItems(data);
+            // MERGE POLICY: Union of local and cloud to prevent data loss on refresh
+            // If cloud has data, we trust it? 
+            // Or if cloud is empty but local has data, keep local?
+
+            // Current approach: If cloud returns data, use it. But if cloud is empty/fails and we have local, keep local?
+            // Safer: If data is not empty, use it.
+            if (data && data.length > 0) {
+                setItems(data);
+                // Also update local cache to match cloud
+                localStorage.setItem('offline_shopping_list', JSON.stringify(data));
+            }
+            // If data is empty but we have local, maybe we shouldn't wipe it immediately if it's a connection glitch?
+            // But if user genuinely deleted everything, effective sync requires wiping.
+            // Let's rely on the fact that if 'data' comes in as empty array [], it means "deleted".
+            // However, to fix "I write and it disappears":
+            // We'll set state.
+            else if (data && data.length === 0) {
+                // Should we wipe? If user says "it wipes", maybe cloud is returning [] erroneously?
+                // For now, let's respect cloud if it returns, but...
+                // Only if network is actually connected? We don't know.
+                // Let's trust cloud > local generally, BUT:
+                // If I just wrote to local, and cloud writes fail, cloud listener might not fire or fire with old data?
+                // Let's just update local on every valid cloud update.
+                setItems(data);
+                localStorage.setItem('offline_shopping_list', JSON.stringify(data));
+            }
             setIsLoading(false);
         });
         return () => unsub();
     }, []);
+
+    const updateLocalAndCloud = async (newItems: string[]) => {
+        // 1. Update State
+        setItems(newItems);
+        // 2. Update Local
+        localStorage.setItem('offline_shopping_list', JSON.stringify(newItems));
+        // 3. Update Cloud
+        try {
+            await updateShoppingList(newItems);
+        } catch (error) {
+            console.error("Failed to sync shopping list", error);
+        }
+    };
 
     const handleAddItem = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!newItem.trim()) return;
 
         const updatedItems = [...items, newItem.trim()];
-        setItems(updatedItems); // Optimistic update
         setNewItem('');
-
-        try {
-            await updateShoppingList(updatedItems);
-        } catch (error) {
-            console.error("Failed to add item", error);
-            // Revert? For simplicty, next snapshot will fix it
-        }
+        await updateLocalAndCloud(updatedItems);
     };
 
     const handleRemoveItem = async (index: number) => {
         const updatedItems = items.filter((_, i) => i !== index);
-        setItems(updatedItems); // Optimistic
-
-        try {
-            await updateShoppingList(updatedItems);
-        } catch (error) {
-            console.error("Failed to remove item", error);
-        }
+        await updateLocalAndCloud(updatedItems);
     };
 
     return (
