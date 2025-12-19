@@ -35,14 +35,15 @@ export default function DashboardPage() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Sync Status State: Start as 'syncing' to prove connection
-    const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('syncing');
-    const [lastError, setLastError] = useState<string>(''); // Capture detailed error
+    const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
+    const [lastError, setLastError] = useState<string | null>(null);
+    const [debugDocId, setDebugDocId] = useState<string>(""); // JAVIVASCO: New debug state
 
     // Monitor Online/Offline events
     useEffect(() => {
         const handleOnline = () => {
             setSyncStatus('synced');
-            setLastError('');
+            setLastError(null);
         };
         const handleOffline = () => {
             setSyncStatus('error');
@@ -160,6 +161,9 @@ export default function DashboardPage() {
                 }
                 // CONFIRM CONNECTION: If we got data (even null), we are connected
                 setSyncStatus('synced');
+                // Debug: Capture the document ID we are listening to
+                const currentDocId = `${subscriptionDateStr}_${currentUser.username}`;
+                setDebugDocId(currentDocId);
             }, (error) => {
                 console.error("Subscription Error (Own Tasks):", error);
                 setSyncStatus('error');
@@ -756,9 +760,8 @@ export default function DashboardPage() {
                     </aside>
                 </div> {/* Close dashboard-layout */}
 
-                {/* Debug Info Footer */}
                 <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>
-                    <p>Debug ID: {getTodayDateString()}_{user?.username} | Status: {syncStatus} | Auth: {(typeof window !== 'undefined' ? (window as any).__AUTH_STATUS__ : 'Loading...')} {lastError && `| Error: ${lastError}`}</p>
+                    <p>Debug ID: {getTodayDateString()}_{user?.username} | Doc: {debugDocId} | Status: {syncStatus} | Auth: {(typeof window !== 'undefined' ? (window as any).__AUTH_STATUS__ : 'Loading...')} {lastError && `| Error: ${lastError}`}</p>
                 </div>
             </div>
             {showPasswordModal && user && (
