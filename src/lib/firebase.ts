@@ -19,8 +19,8 @@ const app = initializeApp(firebaseConfig);
 // JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
 // export const db = getFirestore(app);
 // JAVIVASCO: Reverting to Standard WebSockets + Fresh Session
-export const db = getFirestore(app);
-// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// export const db = getFirestore(app);
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
