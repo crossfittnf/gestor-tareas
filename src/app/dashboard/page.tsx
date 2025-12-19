@@ -34,8 +34,8 @@ export default function DashboardPage() {
     // Dropdown Menu State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Sync Status State
-    const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
+    // Sync Status State: Start as 'syncing' to prove connection
+    const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('syncing');
     const [lastError, setLastError] = useState<string>(''); // Capture detailed error
 
     // Monitor Online/Offline events
@@ -123,36 +123,25 @@ export default function DashboardPage() {
             const unsubOwn = subscribeToUserDay(todayStr, currentUser.username, (data) => {
                 if (data && data.tasks) {
                     setTasks(prevTasks => {
-                        // READ LATEST LOCAL STORAGE to Ensure we don't overwrite recent offline changes
+                        // ... existing merge logic ...
                         const currentLocalStr = localStorage.getItem(localKey);
                         const currentLocal = currentLocalStr ? JSON.parse(currentLocalStr) : {};
 
                         return prevTasks.map(t => {
                             const cloudStatus = data.tasks[t.id];
                             const localStatus = currentLocal[t.id];
-
-                            // MERGE LOGIC:
-                            // If Local says completed, keep it completed (User might have just clicked it and cloud is lagging)
-                            // If Cloud says completed, accept it (Other device update?)
-                            // We prioritize 'true' to avoid data loss.
-
                             const isCompleted = (localStatus?.completed) || (cloudStatus?.completed) || false;
-
-                            // Observations: Concatenate? Or prefer Local if newer? 
-                            // Let's prefer Local if it exists and is not empty, else Cloud.
                             const observation = (localStatus?.observations) || (cloudStatus?.observations) || t.observations;
 
                             if (cloudStatus || localStatus) {
-                                return {
-                                    ...t,
-                                    completed: isCompleted,
-                                    observations: observation
-                                };
+                                return { ...t, completed: isCompleted, observations: observation };
                             }
                             return t;
                         });
                     });
                 }
+                // CONFIRM CONNECTION: If we got data (even null), we are connected
+                setSyncStatus('synced');
             }, (error) => {
                 console.error("Subscription Error (Own Tasks):", error);
                 setSyncStatus('error');
