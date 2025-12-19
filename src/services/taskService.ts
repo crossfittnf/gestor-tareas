@@ -22,8 +22,10 @@ export function subscribeToUserDay(
     onUpdate: (data: DayLog | null) => void,
     onError?: (error: Error) => void
 ) {
-    const docId = `${date}_${username}`;
-    const docRef = doc(db, 'daily_logs', docId);
+    // JAVIVASCO: Migrating to 'general' collection inside 'tasks' sub-path or prefixed doc
+    // Strategy: Use a prefixed doc ID inside the 'general' collection which we KNOW works.
+    const docId = `tasks_${date}_${username}`;
+    const docRef = doc(db, 'general', docId);
 
     return onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -47,8 +49,9 @@ export async function updateTaskStatus(
     taskId: string,
     updates: Partial<TaskStatus>
 ) {
-    const docId = `${date}_${username}`;
-    const docRef = doc(db, 'daily_logs', docId);
+    // JAVIVASCO: Migrating to 'general' collection
+    const docId = `tasks_${date}_${username}`;
+    const docRef = doc(db, 'general', docId);
 
     try {
         // We use setDoc with merge: true to create or update
@@ -90,8 +93,8 @@ export async function updateTaskStatus(
  * For now, this is a direct fetch helper.
  */
 export async function getDayLog(date: string, username: string): Promise<DayLog | null> {
-    const docId = `${date}_${username}`;
-    const docRef = doc(db, 'daily_logs', docId);
+    const docId = `tasks_${date}_${username}`;
+    const docRef = doc(db, 'general', docId);
     const snap = await getDoc(docRef);
 
     if (snap.exists()) {
