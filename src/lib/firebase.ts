@@ -18,7 +18,9 @@ const app = initializeApp(firebaseConfig);
 // JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
 // JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
 // export const db = getFirestore(app);
-export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// JAVIVASCO: Reverting to Standard WebSockets + Fresh Session
+export const db = getFirestore(app);
+// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
@@ -38,7 +40,7 @@ enableIndexedDbPersistence(db).catch((err) => {
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
 // JAVIVASCO: Adding global auth listener for debug
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 onAuthStateChanged(auth, (user) => {
     if (user) {
@@ -55,14 +57,12 @@ onAuthStateChanged(auth, (user) => {
         }
     }
 });
-
 signInAnonymously(auth)
     .then((userCredential) => {
         console.log("Anonymous Auth Success:", userCredential.user.uid);
     })
     .catch((err) => {
         console.error("Failed to sign in anonymously", err);
-        if (typeof window !== 'undefined') {
-            (window as any).__AUTH_STATUS__ = `Auth Error: ${err.message}`;
-        }
+        // Force token refresh if it fails
+        signOut(auth).then(() => signInAnonymously(auth));
     });

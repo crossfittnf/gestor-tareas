@@ -107,8 +107,8 @@ export interface ShoppingList {
 }
 
 export function subscribeToShoppingList(onUpdate: (items: string[]) => void, onError?: (error: Error) => void) {
-    // JAVIVASCO: Migrating to v2 to bypass stuck cache on devices
-    const docRef = doc(db, 'general', 'shopping_v2');
+    // JAVIVASCO: V3 - Final Cache Buster
+    const docRef = doc(db, 'general', 'shopping_v3');
     return onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
             onUpdate(snapshot.data().items || []);
@@ -122,6 +122,6 @@ export function subscribeToShoppingList(onUpdate: (items: string[]) => void, onE
 }
 
 export async function updateShoppingList(items: string[]) {
-    const docRef = doc(db, 'general', 'shopping_v2');
+    const docRef = doc(db, 'general', 'shopping_v3');
     await setDoc(docRef, { items }, { merge: true });
 }
