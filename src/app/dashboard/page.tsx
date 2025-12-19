@@ -145,29 +145,30 @@ export default function DashboardPage() {
             setDebugDocId(`Connecting to ${targetId}...`);
 
             // 1. Subscribe to OWN tasks
-            const unsubOwn = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
-                if (data && data.tasks) {
-                    setTasks(prevTasks => {
-                        // ... existing merge logic ...
-                        const currentLocalStr = localStorage.getItem(localKey);
-                        const currentLocal = currentLocalStr ? JSON.parse(currentLocalStr) : {};
+            // JAVIVASCO: FIXED Argument Order (Date, Username)
+            const unsub = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
+                // Determine 'currentUser' effectivelya.tasks) {
+                setTasks(prevTasks => {
+                    // ... existing merge logic ...
+                    const currentLocalStr = localStorage.getItem(localKey);
+                    const currentLocal = currentLocalStr ? JSON.parse(currentLocalStr) : {};
 
-                        return prevTasks.map(t => {
-                            const cloudStatus = data.tasks?.[t.id]; // Use optional chaining for data.tasks
-                            const localStatus = currentLocal[t.id];
-                            const isCompleted = (localStatus?.completed) || (cloudStatus?.completed) || false;
-                            const observation = (localStatus?.observations) || (cloudStatus?.observations) || t.observations;
+                    return prevTasks.map(t => {
+                        const cloudStatus = data.tasks?.[t.id]; // Use optional chaining for data.tasks
+                        const localStatus = currentLocal[t.id];
+                        const isCompleted = (localStatus?.completed) || (cloudStatus?.completed) || false;
+                        const observation = (localStatus?.observations) || (cloudStatus?.observations) || t.observations;
 
-                            if (cloudStatus || localStatus) {
-                                return { ...t, completed: isCompleted, observations: observation };
-                            }
-                            return t;
-                        });
+                        if (cloudStatus || localStatus) {
+                            return { ...t, completed: isCompleted, observations: observation };
+                        }
+                        return t;
                     });
-                    setSyncStatus('synced');
-                    setDebugDocId(`${targetId} (OK: ${data.tasks ? Object.keys(data.tasks).length : 0} tasks)`);
-                } else {
-                    setDebugDocId(`${targetId} (EMPTY/NULL)`);
+                });
+                setSyncStatus('synced');
+                setDebugDocId(`${targetId} (OK: ${data.tasks ? Object.keys(data.tasks).length : 0} tasks)`);
+            } else {
+                setDebugDocId(`${targetId}(EMPTY / NULL)`);
                 }
             }, (err) => {
                 console.error("Subscription Error (Own Tasks):", err);
@@ -217,7 +218,7 @@ export default function DashboardPage() {
         // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
             const todayStr = getTodayDateString();
-            const localKey = `offline_tasks_${todayStr}_${user.username}`;
+            const localKey = `offline_tasks_${ todayStr }_${ user.username }`;
 
             // Build a map of changes to save
             const currentSaved = JSON.parse(localStorage.getItem(localKey) || '{}');
@@ -257,7 +258,7 @@ export default function DashboardPage() {
         // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
             const todayStr = getTodayDateString();
-            const localKey = `offline_tasks_${todayStr}_${user.username}`;
+            const localKey = `offline_tasks_${ todayStr }_${ user.username }`;
 
             // Build a map of changes to save
             const currentSaved = JSON.parse(localStorage.getItem(localKey) || '{}');
@@ -681,7 +682,7 @@ export default function DashboardPage() {
                             <div className="progress-bar-container">
                                 <div
                                     className="progress-bar-fill"
-                                    style={{ width: `${progressPercentage}%` }}
+                                    style={{ width: `${ progressPercentage } % ` }}
                                 ></div>
                             </div>
                         </div>
