@@ -19,6 +19,10 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Enable Offline Persistence
+// Enable Offline Persistence
+// JAVIVASCO: Disabling persistence temporarily to debug connection hang. 
+// Sometimes multiple tabs with persistence enabled cause a deadlock.
+/*
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
         console.warn('Persistence failed: Multiple tabs open');
@@ -26,8 +30,14 @@ enableIndexedDbPersistence(db).catch((err) => {
         console.warn('Persistence failed: Browser not supported');
     }
 });
+*/
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
-signInAnonymously(auth).catch((err) => {
-    console.error("Failed to sign in anonymously", err);
-});
+console.log("Attempting Anonymous Auth...");
+signInAnonymously(auth)
+    .then((userCredential) => {
+        console.log("Anonymous Auth Success:", userCredential.user.uid);
+    })
+    .catch((err) => {
+        console.error("Failed to sign in anonymously", err);
+    });
