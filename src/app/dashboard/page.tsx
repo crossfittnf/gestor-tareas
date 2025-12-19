@@ -60,9 +60,30 @@ export default function DashboardPage() {
 
             // Fetch Base Tasks
             const baseTasks = MOCK_TASKS;
-            setTasks(baseTasks);
 
+            // 0. Load from LocalStorage (Offline Cache)
             const todayStr = new Date().toISOString().split('T')[0];
+            const localKey = `offline_tasks_${todayStr}_${currentUser.username}`;
+            const savedData = localStorage.getItem(localKey);
+
+            let initialTasks = baseTasks;
+
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    // Merge local data into base tasks
+                    initialTasks = baseTasks.map(t => {
+                        if (parsed[t.id]) {
+                            return { ...t, ...parsed[t.id] };
+                        }
+                        return t;
+                    });
+                } catch (e) {
+                    console.error("Error parsing local tasks", e);
+                }
+            }
+
+            setTasks(initialTasks);
 
             // 1. Subscribe to OWN tasks
             const unsubOwn = subscribeToUserDay(todayStr, currentUser.username, (data) => {
@@ -111,29 +132,49 @@ export default function DashboardPage() {
 
     const handleToggleTask = async (id: string, completed: boolean) => {
         // Optimistic UI Update
-        setTasks(tasks.map(t =>
+        const newTasks = tasks.map(t =>
             t.id === id ? { ...t, completed } : t
-        ));
+        );
+        setTasks(newTasks);
 
-        // Sync to Cloud
+        // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
             const todayStr = new Date().toISOString().split('T')[0];
+            const localKey = `offline_tasks_${todayStr}_${user.username}`;
+
+            // Build a map of changes to save
+            const currentSaved = JSON.parse(localStorage.getItem(localKey) || '{}');
+            currentSaved[id] = { ...currentSaved[id], completed };
+            localStorage.setItem(localKey, JSON.stringify(currentSaved));
+
+            // Sync to Cloud
             try {
                 await updateTaskStatus(todayStr, user.username, id, { completed });
             } catch (e) {
                 console.error("Failed to sync task", e);
+                // Optional: Show offline toast
             }
         }
     };
 
     const handleUpdateObservations = async (id: string, observations: string) => {
-        setTasks(tasks.map(t =>
+        // Optimistic UI Update
+        const newTasks = tasks.map(t =>
             t.id === id ? { ...t, observations } : t
-        ));
+        );
+        setTasks(newTasks);
 
-        // Sync to Cloud
+        // SAVE TO LOCAL STORAGE (Immediate Persistence)
         if (user && isWorking) {
             const todayStr = new Date().toISOString().split('T')[0];
+            const localKey = `offline_tasks_${todayStr}_${user.username}`;
+
+            // Build a map of changes to save
+            const currentSaved = JSON.parse(localStorage.getItem(localKey) || '{}');
+            currentSaved[id] = { ...currentSaved[id], observations };
+            localStorage.setItem(localKey, JSON.stringify(currentSaved));
+
+            // Sync to Cloud
             try {
                 await updateTaskStatus(todayStr, user.username, id, { observations });
             } catch (e) {
