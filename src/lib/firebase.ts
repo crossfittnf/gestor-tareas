@@ -16,10 +16,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 // Use initializeFirestore to force long polling - bypasses firewall blocking WebSockets
 // JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
-// JAVIVASCO: API Key is fixed. Reverting to standard WebSocket connection.
-// Long Polling might be causing sync issues on iPhone.
-export const db = getFirestore(app);
-// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
+// export const db = getFirestore(app);
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
