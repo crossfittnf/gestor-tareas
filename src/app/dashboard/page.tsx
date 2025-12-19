@@ -58,7 +58,17 @@ export default function DashboardPage() {
 
     useEffect(() => {
         const unsub = subscribeToShoppingList((data) => {
+            // Merge logic required for Shopping List too?
+            // Currently simple overwrite, but we have offline logic in component.
+            // This listener just keeps app shell aware? 
+            // Actually ShoppingBlackboard handles its own subscription/logic usually?
+            // Checking: Dashboard DOES pass nothing to Blackboard, ShoppingBlackboard handles itself? 
+            // Wait, this subscription in DashboardPage seems redundant if ShoppingBlackboard is self-contained.
+            // Let's verify ShoppingBlackboard imports.
             setShoppingList(data);
+        }, (error) => {
+            setSyncStatus('error');
+            setLastError(error.message);
         });
         return () => unsub();
     }, []);
@@ -143,6 +153,10 @@ export default function DashboardPage() {
                         });
                     });
                 }
+            }, (error) => {
+                console.error("Subscription Error (Own Tasks):", error);
+                setSyncStatus('error');
+                setLastError(error.message);
             });
 
             // 2. If Afternoon shift, subscribe to MORNING tasks
@@ -157,6 +171,10 @@ export default function DashboardPage() {
 
                     unsubMorning = subscribeToUserDay(todayStr, morningUsername, (data) => {
                         setMorningLog(data);
+                    }, (error) => {
+                        console.error("Subscription Error (Morning Tasks):", error);
+                        setSyncStatus('error');
+                        setLastError(error.message);
                     });
                 }
             }
@@ -166,7 +184,7 @@ export default function DashboardPage() {
                 unsubMorning();
             };
         }
-    }, [router]);
+    }, [router, user, isWorking]);
 
     const handleLogout = () => {
         localStorage.removeItem('currentUser');

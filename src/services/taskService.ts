@@ -19,7 +19,8 @@ export interface DayLog {
 export function subscribeToUserDay(
     date: string,
     username: string,
-    onUpdate: (data: DayLog | null) => void
+    onUpdate: (data: DayLog | null) => void,
+    onError?: (error: Error) => void
 ) {
     const docId = `${date}_${username}`;
     const docRef = doc(db, 'daily_logs', docId);
@@ -30,6 +31,9 @@ export function subscribeToUserDay(
         } else {
             onUpdate(null);
         }
+    }, (error) => {
+        console.error("Error watching user day:", error);
+        if (onError) onError(error);
     });
 }
 
@@ -102,7 +106,7 @@ export interface ShoppingList {
     items: string[];
 }
 
-export function subscribeToShoppingList(onUpdate: (items: string[]) => void) {
+export function subscribeToShoppingList(onUpdate: (items: string[]) => void, onError?: (error: Error) => void) {
     const docRef = doc(db, 'general', 'shopping');
     return onSnapshot(docRef, (snapshot) => {
         if (snapshot.exists()) {
@@ -110,6 +114,9 @@ export function subscribeToShoppingList(onUpdate: (items: string[]) => void) {
         } else {
             onUpdate([]);
         }
+    }, (error) => {
+        console.error("Error watching shopping list:", error);
+        if (onError) onError(error);
     });
 }
 
