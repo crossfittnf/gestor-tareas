@@ -138,6 +138,12 @@ export default function DashboardPage() {
             // We use our helper to guarantee consistency
             const subscriptionDateStr = getTodayDateString();
 
+            // JAVIVASCO: Debugging Task Listener
+            // Construct ID manually to verify inputs
+            const targetId = `${subscriptionDateStr}_${currentUser.username}`;
+            console.log(`[DEBUG] Attempting to subscribe to: ${targetId}`);
+            setDebugDocId(`Connecting to ${targetId}...`);
+
             // 1. Subscribe to OWN tasks
             const unsubOwn = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
                 if (data && data.tasks) {
@@ -147,7 +153,7 @@ export default function DashboardPage() {
                         const currentLocal = currentLocalStr ? JSON.parse(currentLocalStr) : {};
 
                         return prevTasks.map(t => {
-                            const cloudStatus = data.tasks[t.id];
+                            const cloudStatus = data.tasks?.[t.id]; // Use optional chaining for data.tasks
                             const localStatus = currentLocal[t.id];
                             const isCompleted = (localStatus?.completed) || (cloudStatus?.completed) || false;
                             const observation = (localStatus?.observations) || (cloudStatus?.observations) || t.observations;
@@ -158,16 +164,15 @@ export default function DashboardPage() {
                             return t;
                         });
                     });
+                    setSyncStatus('synced');
+                    setDebugDocId(`${targetId} (OK: ${data.tasks ? Object.keys(data.tasks).length : 0} tasks)`);
+                } else {
+                    setDebugDocId(`${targetId} (EMPTY/NULL)`);
                 }
-                // CONFIRM CONNECTION: If we got data (even null), we are connected
-                setSyncStatus('synced');
-                // Debug: Capture the document ID we are listening to
-                const currentDocId = `${subscriptionDateStr}_${currentUser.username}`;
-                setDebugDocId(currentDocId);
-            }, (error) => {
-                console.error("Subscription Error (Own Tasks):", error);
+            }, (err) => {
+                console.error("Subscription Error (Own Tasks):", err);
                 setSyncStatus('error');
-                setLastError(error.message);
+                setLastError(err.message);
             });
 
             // 2. If Afternoon shift, subscribe to MORNING tasks
