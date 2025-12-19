@@ -767,9 +767,10 @@ export default function DashboardPage() {
                     </aside>
                 </div> {/* Close dashboard-layout */}
 
-                <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>
+                {/* Debug Footer Removed for Production */
+                /* <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>
                     <p>Debug ID: {getTodayDateString()}_{user?.username} | Doc: {debugDocId} | Status: {syncStatus} | Auth: {(typeof window !== 'undefined' ? (window as any).__AUTH_STATUS__ : 'Loading...')} {lastError && `| Error: ${lastError}`}</p>
-                </div>
+                </div> */}
             </div>
             {showPasswordModal && user && (
                 <ChangePasswordModal

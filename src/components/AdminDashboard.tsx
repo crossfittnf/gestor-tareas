@@ -25,9 +25,9 @@ export default function AdminDashboard({ currentUser }: AdminDashboardProps) {
     useEffect(() => {
         const unsubs: (() => void)[] = [];
 
-        // Employees to watch
+        // Employees to watch (Include admins as they might perform tasks too)
         const employeesToWatch = selectedEmployee === 'all'
-            ? MOCK_USERS.filter(u => u.role !== 'admin')
+            ? MOCK_USERS
             : MOCK_USERS.filter(u => u.username === selectedEmployee);
 
         // Clear previous logs on filter change/date change to avoid stale data flicker
@@ -89,7 +89,7 @@ export default function AdminDashboard({ currentUser }: AdminDashboardProps) {
         const allObs: string[] = [];
 
         const usersToCount = selectedEmployee === 'all'
-            ? MOCK_USERS.filter(u => u.role !== 'admin')
+            ? MOCK_USERS
             : MOCK_USERS.filter(u => u.username === selectedEmployee);
 
         usersToCount.forEach(user => {
@@ -118,7 +118,9 @@ export default function AdminDashboard({ currentUser }: AdminDashboardProps) {
             {/* Controls Section */}
             <section className="admin-controls">
                 <div className="control-group">
-                    <label className="control-label">Fecha</label>
+                    <label className="control-label">
+                        Fecha <span style={{ fontSize: '0.7em', color: '#aaa' }}>(Syncing...)</span>
+                    </label>
                     <input
                         type="date"
                         className="glass-input" // Updated class
@@ -135,9 +137,9 @@ export default function AdminDashboard({ currentUser }: AdminDashboardProps) {
                         onChange={(e) => setSelectedEmployee(e.target.value)}
                     >
                         <option value="all">Todos los empleados</option>
-                        {MOCK_USERS.filter(u => u.role !== 'admin').map(user => (
+                        {MOCK_USERS.map(user => (
                             <option key={user.id} value={user.username}>
-                                {user.name}
+                                {user.name} ({user.role === 'admin' ? 'Admin' : 'Empleado'})
                             </option>
                         ))}
                     </select>
