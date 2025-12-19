@@ -3,13 +3,13 @@ import { getFirestore, enableIndexedDbPersistence, initializeFirestore } from "f
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDuTx2OENcdi-m-2EG22HGq2JuLMcPB_7c",
-    authDomain: "gestor-tareas-ea4e9.firebaseapp.com",
-    projectId: "gestor-tareas-ea4e9",
-    storageBucket: "gestor-tareas-ea4e9.firebasestorage.app",
-    messagingSenderId: "774610966452",
-    appId: "1:774610966452:web:7cc0a37cd859751da604e1",
-    measurementId: "G-5QQLHT7LST"
+    apiKey: "AIzaSyBsOzCamlEYqGtjTaGOk-orhMiwBTZexKU",
+    authDomain: "gestor-tareas-3204b.firebaseapp.com",
+    projectId: "gestor-tareas-3204b",
+    storageBucket: "gestor-tareas-3204b.firebasestorage.app",
+    messagingSenderId: "380973361212",
+    appId: "1:380973361212:web:8a309ebf20088a1f0ebb39",
+    measurementId: "G-9QDB4FLRMQ"
 };
 
 // Initialize Firebase
