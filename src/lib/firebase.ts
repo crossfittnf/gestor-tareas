@@ -29,7 +29,7 @@ export const auth = getAuth(app);
 // Enable Offline Persistence
 // JAVIVASCO: Disabling persistence PERMANENTLY. It causes deadlocks on Chrome/Mac for this user.
 // The app will work Online-First.
-// Enable Offline Persistence
+/*
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
         console.warn('Persistence failed: Multiple tabs open');
@@ -37,6 +37,7 @@ enableIndexedDbPersistence(db).catch((err) => {
         console.warn('Persistence failed: Browser not supported');
     }
 });
+*/
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
 // JAVIVASCO: Adding global auth listener for debug
