@@ -217,12 +217,10 @@
     }
 
     .dashboard-sidebar {
-        order: -1;
-        /* Put blackboard on top on smaller screens? Or bottom? User said top right. */
-        /* If I put it on top, it might push tasks down too much. */
-        /* Let's keep it below on mobile or provide a toggle? */
-        /* Basic requirement: top right. On mobile, usually means top. */
-        margin-bottom: 2rem;
+        order: 1;
+        /* Move to bottom on mobile so tasks are seen first */
+        margin-top: 2rem;
+        margin-bottom: 0;
     }
 }
 
@@ -402,15 +400,41 @@
     color: var(--foreground);
 }
 
-@media (max-width: 640px) {
-    .header-content {
+@media (max-width: 768px) {
+    .dashboard-header {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
+    }
+
+    .header-shift-badge {
+        position: static;
+        transform: none;
+        width: 100%;
+        border-radius: 0;
+        text-align: center;
+        padding: 0.5rem;
+        font-size: 0.9rem;
+        order: -1;
+        /* Ensure it stays at top */
+    }
+
+    .header-content {
+        width: 100%;
+        padding: 0.5rem 1rem;
+        flex-direction: row;
+        /* Keep row for name + menu */
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .header-info {
+        text-align: left;
     }
 
     .header-actions {
-        width: 100%;
-        justify-content: space-between;
+        width: auto;
+        /* Allow it to shrink */
+        justify-content: flex-end;
     }
 
     .shift-buttons {
