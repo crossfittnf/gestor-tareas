@@ -13,8 +13,6 @@ const QUERY_TIMEOUT = 10000;
 
 export async function getUserByUsername(username: string): Promise<User | null> {
     try {
-        console.log("Starting getUser logic for:", username);
-
         // Direct Doc Reference (No Query = No Index Issues)
         const docId = `user_${username}`;
         const userRef = doc(db, USERS_COLLECTION, docId);
@@ -31,7 +29,6 @@ export async function getUserByUsername(username: string): Promise<User | null> 
         ]) as any;
 
         if (snapshot.exists()) {
-            console.log("User found in Cloud:", snapshot.data());
             return snapshot.data() as User;
         } else {
             console.log("User NOT found in Cloud, initializing from MOCK...");
@@ -42,7 +39,6 @@ export async function getUserByUsername(username: string): Promise<User | null> 
                 try {
                     // Create it now so next time it exists
                     await setDoc(userRef, mockUser);
-                    console.log("User initialized in Cloud");
                     return mockUser;
                 } catch (e) {
                     console.error("Failed to init user", e);
