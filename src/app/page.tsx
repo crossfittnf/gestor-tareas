@@ -38,18 +38,14 @@ export default function LoginPage() {
       // We check if:
       // 1. User exists
       // 2. Password matches (stored password or fallback to username as initial password)
-      // Check if we have an offline override for this user
-      const savedOfflineUsers = JSON.parse(localStorage.getItem('offline_users') || '{}');
-      const offlineUser = user ? savedOfflineUsers[user.id] : null;
-
-      // Use offline password if available, otherwise database/mock password
-      // If we have an offline user, we trust its password over the "stale" mock data found via fallback
-      const effectiveUser = offlineUser || user;
+      // 2. Password matches
+      // JAVIVASCO: Simplified Logic. We trust the cloud user (from 'general').
+      // Offline fallback logic removed to prevent "Old Password" confusion.
+      const effectiveUser = user;
       const storedPassword = effectiveUser?.password || effectiveUser?.username;
 
       console.log("Login check:", {
         inputPassword: password,
-        hasOfflineData: !!offlineUser,
         storedPassword
       });
 
