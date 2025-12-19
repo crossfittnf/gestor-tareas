@@ -202,7 +202,7 @@ export default function DashboardPage() {
                 unsubMorning();
             };
         }
-    }, [router, user, isWorking]);
+    }, [user?.username, isWorking]); // JAVIVASCO: Fixed dependency loop by using primitive string
 
     const handleLogout = () => {
         localStorage.removeItem('currentUser');
