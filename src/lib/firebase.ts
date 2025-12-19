@@ -18,10 +18,10 @@ const app = initializeApp(firebaseConfig);
 // JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
 // JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
 // export const db = getFirestore(app);
-// JAVIVASCO: GOLD STANDARD - WebSockets (Fast) + Persistence (Robust).
-// Now that Project/Key/Rules are fixed, this is the correct config.
-export const db = getFirestore(app);
-// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// JAVIVASCO: FINAL ATTEMPT - Long Polling (Robust) + Persistence (Fast UX).
+// This bypasses CORS/Network issues while keeping the UI snappy.
+// export const db = getFirestore(app);
+export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
