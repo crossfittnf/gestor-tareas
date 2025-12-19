@@ -37,16 +37,13 @@ export default function ShoppingBlackboard({ onSyncStatusChange }: { onSyncStatu
             // However, to fix "I write and it disappears":
             // We'll set state.
             else if (data && data.length === 0) {
-                // Should we wipe? If user says "it wipes", maybe cloud is returning [] erroneously?
-                // For now, let's respect cloud if it returns, but...
-                // Only if network is actually connected? We don't know.
-                // Let's trust cloud > local generally, BUT:
-                // If I just wrote to local, and cloud writes fail, cloud listener might not fire or fire with old data?
-                // Let's just update local on every valid cloud update.
                 setItems(data);
                 localStorage.setItem('offline_shopping_list', JSON.stringify(data));
             }
             setIsLoading(false);
+        }, (error) => {
+            console.error("Shopping List Subscription Error:", error);
+            if (onSyncStatusChange) onSyncStatusChange('error');
         });
         return () => unsub();
     }, []);
