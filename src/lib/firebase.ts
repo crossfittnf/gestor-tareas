@@ -3,7 +3,7 @@ import { getFirestore, enableIndexedDbPersistence, initializeFirestore } from "f
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDuTx2OEncdi-m-2EG22HGq2JuLMcPB_7c",
+    apiKey: "AIzaSyDLKlIbKO7LZjv2gzhxFGDMbm0j4BCNi8U",
     authDomain: "gestor-tareas-ea4e9.firebaseapp.com",
     projectId: "gestor-tareas-ea4e9",
     storageBucket: "gestor-tareas-ea4e9.firebasestorage.app",
