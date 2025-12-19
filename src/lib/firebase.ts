@@ -18,9 +18,10 @@ const app = initializeApp(firebaseConfig);
 // JAVIVASCO: Re-enabling this because standard config failed. Testing [LongPolling + NoPersistence] combo.
 // JAVIVASCO: API Key is fixed. BUT WebSockets failing (Error 400). Reverting to Long Polling.
 // export const db = getFirestore(app);
-// JAVIVASCO: New Project (3204b) - Sync unstable. Re-enabling Long Polling for robustness.
-// export const db = getFirestore(app);
-export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+// JAVIVASCO: GOLD STANDARD - WebSockets (Fast) + Persistence (Robust).
+// Now that Project/Key/Rules are fixed, this is the correct config.
+export const db = getFirestore(app);
+// export const db = initializeFirestore(app, { experimentalForceLongPolling: true });
 // export const db = getFirestore(app);
 export const auth = getAuth(app);
 
@@ -28,7 +29,7 @@ export const auth = getAuth(app);
 // Enable Offline Persistence
 // JAVIVASCO: Disabling persistence PERMANENTLY. It causes deadlocks on Chrome/Mac for this user.
 // The app will work Online-First.
-/*
+// Enable Offline Persistence
 enableIndexedDbPersistence(db).catch((err) => {
     if (err.code == 'failed-precondition') {
         console.warn('Persistence failed: Multiple tabs open');
@@ -36,7 +37,6 @@ enableIndexedDbPersistence(db).catch((err) => {
         console.warn('Persistence failed: Browser not supported');
     }
 });
-*/
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
 // JAVIVASCO: Adding global auth listener for debug
