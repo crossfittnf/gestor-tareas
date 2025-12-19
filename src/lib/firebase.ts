@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, enableIndexedDbPersistence, initializeFirestore } from "firebase/firestore";
 import { getAuth, signInAnonymously } from "firebase/auth";
 
 const firebaseConfig = {
@@ -14,8 +14,20 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+// Use initializeFirestore to force long polling - bypasses firewall blocking WebSockets
+export const db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+});
 export const auth = getAuth(app);
+
+// Enable Offline Persistence
+enableIndexedDbPersistence(db).catch((err) => {
+    if (err.code == 'failed-precondition') {
+        console.warn('Persistence failed: Multiple tabs open');
+    } else if (err.code == 'unimplemented') {
+        console.warn('Persistence failed: Browser not supported');
+    }
+});
 
 // Auto-sign in anonymously to allow Firestore writes if rules require auth
 signInAnonymously(auth).catch((err) => {

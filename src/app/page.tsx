@@ -64,7 +64,17 @@ export default function LoginPage() {
         }
       } else {
         console.warn(`Password mismatch. Input: ${password}, Stored: ${storedPassword}`);
-        setError('Usuario o contraseña incorrectos. (Si no tienes internet, prueba tu contraseña inicial)');
+
+        let msg = 'Usuario o contraseña incorrectos.';
+
+        // Detailed feedback for "Offline but trying new password" scenario
+        if (!effectiveUser?.password && user?.username && password && password !== user.username) {
+          msg += ' (Si estás OFFLINE, prueba con tu contraseña inicial/usuario)';
+        } else {
+          msg += ' (Si no tienes internet, prueba tu contraseña inicial)';
+        }
+
+        setError(msg);
         setIsLoading(false);
       }
     } catch (err) {

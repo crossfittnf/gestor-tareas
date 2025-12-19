@@ -36,11 +36,18 @@ export default function DashboardPage() {
 
     // Sync Status State
     const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
+    const [lastError, setLastError] = useState<string>(''); // Capture detailed error
 
     // Monitor Online/Offline events
     useEffect(() => {
-        const handleOnline = () => setSyncStatus('synced'); // Optimistic
-        const handleOffline = () => setSyncStatus('error');
+        const handleOnline = () => {
+            setSyncStatus('synced');
+            setLastError('');
+        };
+        const handleOffline = () => {
+            setSyncStatus('error');
+            setLastError('Browser Offline Event');
+        };
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
         return () => {
@@ -197,9 +204,11 @@ export default function DashboardPage() {
                 ]);
 
                 setSyncStatus('synced');
-            } catch (e) {
+                setLastError('');
+            } catch (e: any) {
                 console.error("Failed to sync task", e);
                 setSyncStatus('error');
+                setLastError(e?.message || 'Unknown Sync Error');
             }
         }
     };
@@ -234,9 +243,11 @@ export default function DashboardPage() {
                 ]);
 
                 setSyncStatus('synced');
-            } catch (e) {
+                setLastError('');
+            } catch (e: any) {
                 console.error("Failed to sync observations", e);
                 setSyncStatus('error');
+                setLastError(e?.message || 'Unknown Sync Error');
             }
         }
     };
@@ -719,6 +730,11 @@ export default function DashboardPage() {
                         <ShoppingBlackboard onSyncStatusChange={setSyncStatus} />
                     </aside>
                 </div> {/* Close dashboard-layout */}
+
+                {/* Debug Info Footer */}
+                <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>
+                    <p>Debug ID: {getTodayDateString()}_{user?.username} | Status: {syncStatus} {lastError && `| Error: ${lastError}`}</p>
+                </div>
             </div>
             {showPasswordModal && user && (
                 <ChangePasswordModal
