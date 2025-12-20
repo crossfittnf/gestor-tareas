@@ -90,9 +90,34 @@ export default function SchedulePage() {
                         <thead>
                             <tr>
                                 {/* Removed Shift Column Header */}
-                                {DAYS.map(day => (
-                                    <th key={day.key} className="day-header">{day.label}</th>
-                                ))}
+                                {DAYS.map(day => {
+                                    // Calculate date for this day of the CURRENT week
+                                    // Start with a new Date object (today)
+                                    const today = new Date();
+                                    const currentDay = today.getDay(); // 0 = sun, 1 = mon...
+                                    // Normalize sunday to 7 for simpler math (Mon=1 ... Sun=7)
+                                    const currentDayIndex = currentDay === 0 ? 7 : currentDay;
+
+                                    // Map DAYS array (0=Monday ... 6=Sunday) to 1-7
+                                    // Our DAYS array starts at Monday=0 index
+                                    const targetDayIndex = DAYS.indexOf(day) + 1;
+
+                                    const diff = targetDayIndex - currentDayIndex;
+
+                                    const targetDate = new Date(today);
+                                    targetDate.setDate(today.getDate() + diff);
+
+                                    const dateStr = targetDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+                                    return (
+                                        <th key={day.key} className="day-header">
+                                            {day.label}
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 'normal', marginTop: '0.2rem', color: '#666' }}>
+                                                {dateStr}
+                                            </div>
+                                        </th>
+                                    );
+                                })}
                             </tr>
                         </thead>
                         <tbody>
