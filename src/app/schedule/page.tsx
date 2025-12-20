@@ -6,11 +6,12 @@ import { MOCK_USERS } from '@/lib/mockData';
 import './schedule.css';
 
 // Employee colors
+// Employee colors
 const EMPLOYEE_COLORS: Record<string, string> = {
-    'javivasco': '#FFB84D80',  // Orange (50%)
-    'ivan': '#FFE06680',       // Yellow (50%)
-    'andres': '#90EE9080',     // Light Green (50%)
-    'cristina': '#FFB6C180',   // Light Pink (50%)
+    'javivasco': '#FFB84D',  // Orange (100%)
+    'ivan': '#FFE066',       // Yellow (100%)
+    'andres': '#90EE90',     // Light Green (100%)
+    'cristina': '#FFB6C1',   // Light Pink (100%)
 };
 
 // Simplified shift blocks - only 2 rows now
@@ -112,7 +113,7 @@ export default function SchedulePage() {
                                     return (
                                         <th key={day.key} className="day-header">
                                             {day.label}
-                                            <div style={{ fontSize: '0.75rem', fontWeight: 'normal', marginTop: '0.2rem', color: '#666' }}>
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 'bold', marginTop: '0.2rem', color: 'rgba(255,255,255, 0.9)' }}>
                                                 {dateStr}
                                             </div>
                                         </th>
