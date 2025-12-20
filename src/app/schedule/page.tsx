@@ -48,13 +48,13 @@ export default function SchedulePage() {
                     employees.push({
                         name: user.name,
                         username: user.username,
-                        color: EMPLOYEE_COLORS[user.username],
+                        color: EMPLOYEE_COLORS[user.username.toLowerCase()] || '#eee',
                     });
                 } else if (!isWeekend && dayShift === 'morning') {
                     employees.push({
                         name: user.name,
                         username: user.username,
-                        color: EMPLOYEE_COLORS[user.username],
+                        color: EMPLOYEE_COLORS[user.username.toLowerCase()] || '#eee',
                     });
                 }
             }
@@ -63,7 +63,7 @@ export default function SchedulePage() {
                 employees.push({
                     name: user.name,
                     username: user.username,
-                    color: EMPLOYEE_COLORS[user.username],
+                    color: EMPLOYEE_COLORS[user.username.toLowerCase()] || '#eee',
                 });
             }
         }
