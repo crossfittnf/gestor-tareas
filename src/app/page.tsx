@@ -236,6 +236,15 @@ export default function LoginPage() {
                 'Iniciar Sesión'
               )}
             </button>
+            <div className="login-help" style={{ marginTop: '1rem', textAlign: 'center' }}>
+              <button
+                type="button"
+                style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: '0.85rem', cursor: 'pointer', textDecoration: 'underline' }}
+                onClick={() => alert('Contacta con el administrador (Javi) para que resetee tu contraseña desde el panel de gestión.')}
+              >
+                ¿No recuerdas tu contraseña?
+              </button>
+            </div>
           </form>
         ) : (
           <form className="login-form" onSubmit={handleChangePassword}>

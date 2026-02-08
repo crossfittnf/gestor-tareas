@@ -22,10 +22,11 @@ export interface User {
 
 // Real employees from Tnf Box
 export const MOCK_USERS: User[] = [
-    { id: '1', username: 'Javivasco', name: 'Javi Vasco', role: 'admin', password: 'Javivasco', requiresPasswordChange: true },
-    { id: '2', username: 'Ivan', name: 'Ivan', role: 'employee', password: 'Ivan', requiresPasswordChange: true },
-    { id: '3', username: 'Andres', name: 'Andres', role: 'employee', password: 'Andres', requiresPasswordChange: true },
-    { id: '4', username: 'Cristina', name: 'Cristina', role: 'employee', password: 'Cristina', requiresPasswordChange: true },
+    { id: '1', username: 'Javivasco', name: 'Javi Vasco', role: 'admin', password: 'Javivasco', requiresPasswordChange: false },
+    { id: '2', username: 'Ivan', name: 'Ivan', role: 'employee', password: 'Ivan', requiresPasswordChange: false },
+    { id: '3', username: 'Andres', name: 'Andres', role: 'employee', password: 'Andres', requiresPasswordChange: false },
+    { id: '4', username: 'Cristina', name: 'Cristina', role: 'employee', password: 'Cristina', requiresPasswordChange: false },
+    { id: '5', username: 'Aisha', name: 'Aisha', role: 'employee', password: 'aisha', requiresPasswordChange: false },
 ];
 
 const today = new Date().toISOString().split('T')[0];

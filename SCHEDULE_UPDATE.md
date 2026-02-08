@@ -74,6 +74,7 @@ Los 4 usuarios con acceso son:
 | `ivan` | `ivan` | Ivan |
 | `andres` | `andres` | Andres |
 | `cristina` | `cristina` | Cristina |
+| `Aisha` | `aisha` | Aisha |
 
 ## Días de la Semana
 

@@ -1,0 +1,46 @@
+# Instrucciones de Instalación y Uso (Robot de Reportes)
+
+Este script automatiza el envío del reporte diario de tareas por WhatsApp.
+Está diseñado para ejecutarse en el "ordenador siempre encendido".
+
+## 1. Requisitos Previos
+- Tener **Node.js** instalado (https://nodejs.org/)
+- Que la aplicación "Gestor Tareas" esté funcionando (normalmente en `http://localhost:3000`).
+
+## 2. Instalación
+1. Copia esta carpeta `automation` al escritorio.
+2. Abre una terminal dentro de la carpeta.
+3. Ejecuta el comando:
+   ```bash
+   npm install
+   ```
+   (Esto descargará Puppeteer, el navegador automatizado).
+
+## 3. Configuración
+1. Abre el archivo `index.js` con un editor de texto.
+2. Busca la línea: `const PASSWORD = 'TuContraseñaAqui';`
+3. **Pon la contraseña real** del usuario administrador (Javivasco).
+4. Asegúrate de que `URL_LOGIN` sea correcta (por defecto `http://localhost:3000`).
+
+## 4. Primer Uso (Importante: WhatsApp Web)
+La primera vez que lo ejecutes, se abrirá un navegador Chrome "limpio".
+1. El robot intentará entrar en WhatsApp Web.
+2. **Tendrás que escanear el código QR con tu móvil** (como si entraras en WhatsApp Web normal).
+3. Una vez escaneado, la sesión se guardará en la carpeta `user_data`.
+4. Las próximas veces, entrará automático sin pedir QR.
+
+## 5. Ejecutar
+Para lanzar el robot manualmente:
+```bash
+node index.js
+```
+
+## 6. Automatización Total (Cron / Tareas)
+Para que se ejecute solo cada día a las 21:00 (por ejemplo):
+
+**En Mac / Linux:**
+Usa `crontab -e` y añade:
+`0 21 * * * /usr/local/bin/node /ruta/a/tu/carpeta/automation/index.js`
+
+**En Windows:**
+Usa el "Programador de Tareas", crea una tarea básica que inicie el programa `node.exe` con el argumento `index.js` en la carpeta correcta.

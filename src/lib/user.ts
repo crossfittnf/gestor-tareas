@@ -11,10 +11,18 @@ export const USERS_COLLECTION = 'general';
  */
 const QUERY_TIMEOUT = 10000;
 
-export async function getUserByUsername(username: string): Promise<User | null> {
+export async function getUserByUsername(inputUsername: string): Promise<User | null> {
+    // Normalize username: Check if it matches a known user (case-insensitive)
+    // This fixes issues where 'cristina' wouldn't match 'Cristina'
+    const normalizedUsername = inputUsername.trim();
+    const mockMatch = MOCK_USERS.find(u => u.username.toLowerCase() === normalizedUsername.toLowerCase());
+
+    // Use the canonical username if found (e.g., "Cristina"), otherwise use input as-is
+    const effectiveUsername = mockMatch ? mockMatch.username : normalizedUsername;
+
     try {
         // Direct Doc Reference (No Query = No Index Issues)
-        const docId = `user_${username}`;
+        const docId = `user_${effectiveUsername}`;
         const userRef = doc(db, USERS_COLLECTION, docId);
 
         // Timeout Promise
@@ -34,15 +42,14 @@ export async function getUserByUsername(username: string): Promise<User | null> 
             console.log("User NOT found in Cloud, initializing from MOCK...");
 
             // Initialize THIS user specifically if missing
-            const mockUser = MOCK_USERS.find(u => u.username === username);
-            if (mockUser) {
+            if (mockMatch) {
                 try {
                     // Create it now so next time it exists
-                    await setDoc(userRef, mockUser);
-                    return mockUser;
+                    await setDoc(userRef, mockMatch);
+                    return mockMatch;
                 } catch (e) {
                     console.error("Failed to init user", e);
-                    return mockUser; // Return mock anyway
+                    return mockMatch; // Return mock anyway
                 }
             }
             return null;
@@ -51,8 +58,40 @@ export async function getUserByUsername(username: string): Promise<User | null> 
     } catch (error) {
         console.error("Error/Timeout in getUserByUsername:", error);
         console.warn("Falling back to MOCK_USERS");
-        return MOCK_USERS.find(u => u.username === username) || null;
+        return mockMatch || null;
     }
+}
+
+/**
+ * Resets a user's password to their initial state (username) 
+ * and forces a password change on next login.
+ */
+export async function resetUserPassword(username: string) {
+    const mockMatch = MOCK_USERS.find(u => u.username.toLowerCase() === username.toLowerCase());
+
+    if (!mockMatch) {
+        throw new Error("Usuario no encontrado en la configuración.");
+    }
+
+    const docId = `user_${mockMatch.username}`;
+    const userRef = doc(db, USERS_COLLECTION, docId);
+
+    const resetData = {
+        ...mockMatch,
+        password: mockMatch.password || mockMatch.username, // Use initial password or username
+        requiresPasswordChange: true
+    };
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Firestore timeout resetting password")), QUERY_TIMEOUT)
+    );
+
+    await Promise.race([
+        setDoc(userRef, resetData, { merge: true }),
+        timeoutPromise
+    ]);
+
+    console.log(`Password reset successfully for ${username}`);
 }
 
 // Deprecated bulk init (no longer needed as we auto-init on fetch)

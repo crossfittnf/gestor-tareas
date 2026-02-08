@@ -12,6 +12,7 @@ const EMPLOYEE_COLORS: Record<string, string> = {
     'ivan': '#FFE066',       // Yellow (100%)
     'andres': '#90EE90',     // Light Green (100%)
     'cristina': '#FFB6C1',   // Light Pink (100%)
+    'aisha': '#87CEFA',      // Light Sky Blue
 };
 
 // Simplified shift blocks - only 2 rows now
@@ -42,7 +43,7 @@ export default function SchedulePage() {
 
             const dayShift = userSchedule[day as keyof typeof userSchedule];
 
-            // For morning row: show morning shifts on weekdays and full-day on weekends
+            // For morning row: show morning shifts on weekdays, full-day on weekends, OR full-day on weekdays
             if (shiftId === 'morning') {
                 if (isWeekend && dayShift === 'full-day') {
                     employees.push({
@@ -50,7 +51,7 @@ export default function SchedulePage() {
                         username: user.username,
                         color: EMPLOYEE_COLORS[user.username.toLowerCase()] || '#eee',
                     });
-                } else if (!isWeekend && dayShift === 'morning') {
+                } else if (!isWeekend && (dayShift === 'morning' || dayShift === 'full-day')) {
                     employees.push({
                         name: user.name,
                         username: user.username,
@@ -58,8 +59,8 @@ export default function SchedulePage() {
                     });
                 }
             }
-            // For afternoon row: only show on weekdays
-            else if (shiftId === 'afternoon' && !isWeekend && dayShift === 'afternoon') {
+            // For afternoon row: show on weekdays if afternoon OR full-day
+            else if (shiftId === 'afternoon' && !isWeekend && (dayShift === 'afternoon' || dayShift === 'full-day')) {
                 employees.push({
                     name: user.name,
                     username: user.username,
@@ -126,8 +127,18 @@ export default function SchedulePage() {
                                 <tr key={shift.id}>
                                     {/* Removed Shift Label Cell */}
                                     {DAYS.map(day => {
-                                        // For afternoon row, disable weekend cells
-                                        if (shift.id === 'afternoon' && day.isWeekend) {
+                                        // Check if this specific day is the Feb 2nd holiday
+                                        const today = new Date();
+                                        const currentDay = today.getDay();
+                                        const currentDayIndex = currentDay === 0 ? 7 : currentDay;
+                                        const targetDayIndex = DAYS.indexOf(day) + 1;
+                                        const diff = targetDayIndex - currentDayIndex;
+                                        const targetDate = new Date(today);
+                                        targetDate.setDate(today.getDate() + diff);
+                                        const isHolidayToday = targetDate.toLocaleDateString('sv-SE') === '2026-02-02';
+
+                                        // For afternoon row, disable weekend cells and holidays
+                                        if (shift.id === 'afternoon' && (day.isWeekend || isHolidayToday)) {
                                             return <td key={day.key} className="schedule-cell disabled-cell"></td>;
                                         }
 
@@ -136,7 +147,11 @@ export default function SchedulePage() {
                                         // Determine time for this cell
                                         let timeLabel = '';
                                         if (shift.id === 'morning') {
-                                            timeLabel = day.isWeekend ? '09:00 - 14:00' : '08:45 - 13:45';
+                                            if (isHolidayToday) {
+                                                timeLabel = '09:00 - 14:00';
+                                            } else {
+                                                timeLabel = day.isWeekend ? '09:00 - 14:00' : '08:45 - 13:45';
+                                            }
                                         } else if (shift.id === 'afternoon') {
                                             timeLabel = '13:45 - 20:45';
                                         }

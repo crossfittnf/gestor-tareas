@@ -10,6 +10,7 @@ export interface DayLog {
     username: string;
     date: string;
     tasks: Record<string, TaskStatus>; // Map of taskId -> status
+    generalObservations?: string;
 }
 
 /**
@@ -83,6 +84,26 @@ export async function updateTaskStatus(
 
     } catch (error) {
         console.error("Error updating task:", error);
+        throw error;
+    }
+}
+
+export async function updateGeneralObservations(
+    date: string,
+    username: string,
+    observations: string
+) {
+    const docId = `tasks_${date}_${username}`;
+    const docRef = doc(db, 'general', docId);
+
+    try {
+        await setDoc(docRef, {
+            username,
+            date,
+            generalObservations: observations
+        }, { merge: true });
+    } catch (error) {
+        console.error("Error updating general observations:", error);
         throw error;
     }
 }

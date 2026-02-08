@@ -5,13 +5,13 @@ import { useRouter } from 'next/navigation';
 import { User, Task, MOCK_TASKS, ShiftType, SHIFT_LABELS, MOCK_USERS } from '@/lib/mockData';
 import { isUserWorkingToday, getUserShiftToday, getCurrentDayOfWeek, getMorningEmployeeName } from '@/lib/scheduleData';
 import { getTodayDateString } from '@/lib/dateUtils';
-import { subscribeToUserDay, updateTaskStatus, DayLog, subscribeToShoppingList } from '@/services/taskService';
+import { subscribeToUserDay, updateTaskStatus, DayLog, subscribeToShoppingList, updateGeneralObservations } from '@/services/taskService';
 import TaskItem from '@/components/TaskItem';
 import ShoppingBlackboard from '@/components/ShoppingBlackboard';
 import Link from 'next/link';
 import AdminDashboard from '@/components/AdminDashboard';
 import ChangePasswordModal from '@/components/ChangePasswordModal';
-import { SyncStatus } from '@/components/SyncStatus'; // Import new component
+import { SyncStatus } from '@/components/SyncStatus';
 import './dashboard.css';
 
 export default function DashboardPage() {
@@ -20,6 +20,9 @@ export default function DashboardPage() {
     const [tasks, setTasks] = useState<Task[]>([]);
     const [selectedShift, setSelectedShift] = useState<ShiftType | null>(null);
     const [isWorking, setIsWorking] = useState<boolean>(false);
+
+    // New State for General Observations
+    const [generalObservations, setGeneralObservations] = useState("");
 
     // Morning Shift Summary Logic
     const [morningUser, setMorningUser] = useState<User | null>(null);
@@ -34,10 +37,12 @@ export default function DashboardPage() {
     // Dropdown Menu State
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-    // Sync Status State: Start as 'syncing' to prove connection
+    // Sync Status State
     const [syncStatus, setSyncStatus] = useState<'synced' | 'syncing' | 'error'>('synced');
     const [lastError, setLastError] = useState<string | null>(null);
-    const [debugDocId, setDebugDocId] = useState<string>(""); // JAVIVASCO: New debug state
+    const [debugDocId, setDebugDocId] = useState<string>("");
+    const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+    const [activeInstruction, setActiveInstruction] = useState<'14days' | 'tracking' | null>(null);
 
     // Monitor Online/Offline events
     useEffect(() => {
@@ -57,29 +62,8 @@ export default function DashboardPage() {
         };
     }, []);
 
-    /* 
-    // JAVIVASCO: Disabling watchdog now that connection is stable. It was causing false negatives.
-    useEffect(() => {
-        let timeout: NodeJS.Timeout;
-        if (syncStatus === 'syncing') {
-            timeout = setTimeout(() => {
-                 // setSyncStatus((prev) => prev === 'syncing' ? 'error' : prev);
-                 // setLastError((prev) => prev || 'Connection Timeout (Initial)');
-            }, 10000); 
-        }
-        return () => clearTimeout(timeout);
-    }, [syncStatus]);
-    */
-
     useEffect(() => {
         const unsub = subscribeToShoppingList((data) => {
-            // Merge logic required for Shopping List too?
-            // Currently simple overwrite, but we have offline logic in component.
-            // This listener just keeps app shell aware? 
-            // Actually ShoppingBlackboard handles its own subscription/logic usually?
-            // Checking: Dashboard DOES pass nothing to Blackboard, ShoppingBlackboard handles itself? 
-            // Wait, this subscription in DashboardPage seems redundant if ShoppingBlackboard is self-contained.
-            // Let's verify ShoppingBlackboard imports.
             setShoppingList(data);
         }, (error) => {
             setSyncStatus('error');
@@ -104,7 +88,13 @@ export default function DashboardPage() {
 
         if (workingToday) {
             // Get user's shift for today
-            const todayShift = getUserShiftToday(currentUser.username);
+            let todayShift = getUserShiftToday(currentUser.username);
+
+            // Special override: Monday Jan 5th 2026 is a holiday
+            if (getTodayDateString() === '2026-01-05' && todayShift) {
+                todayShift = 'full-day';
+            }
+
             setSelectedShift(todayShift);
 
             // Fetch Base Tasks
@@ -114,6 +104,13 @@ export default function DashboardPage() {
             const todayStr = getTodayDateString();
             const localKey = `offline_tasks_${todayStr}_${currentUser.username}`;
             const savedData = localStorage.getItem(localKey);
+
+            // 0b. Load General Observations from LocalStorage
+            const localKeyObs = `offline_obs_${todayStr}_${currentUser.username}`;
+            const savedObs = localStorage.getItem(localKeyObs);
+            if (savedObs) {
+                setGeneralObservations(savedObs);
+            }
 
             let initialTasks = baseTasks;
 
@@ -135,27 +132,21 @@ export default function DashboardPage() {
             setTasks(initialTasks);
 
             // Ensure we use the exact date string format YYYY-MM-DD in LOCAL time
-            // We use our helper to guarantee consistency
             const subscriptionDateStr = getTodayDateString();
 
-            // JAVIVASCO: Debugging Task Listener
-            // Construct ID manually to verify inputs
             const targetId = `${subscriptionDateStr}_${currentUser.username}`;
             console.log(`[DEBUG] Attempting to subscribe to: ${targetId}`);
             setDebugDocId(`Connecting to ${targetId}...`);
 
             // 1. Subscribe to OWN tasks
-            // JAVIVASCO: FIXED Argument Order (Date, Username)
-            // Rename back to unsubOwn to match cleanup function
             const unsubOwn = subscribeToUserDay(subscriptionDateStr, currentUser.username, (data) => {
                 if (data) {
                     setTasks(prevTasks => {
-                        // ... existing merge logic ...
                         const currentLocalStr = localStorage.getItem(localKey);
                         const currentLocal = currentLocalStr ? JSON.parse(currentLocalStr) : {};
 
                         return prevTasks.map(t => {
-                            const cloudStatus = data.tasks?.[t.id]; // Use optional chaining for data.tasks
+                            const cloudStatus = data.tasks?.[t.id];
                             const localStatus = currentLocal[t.id];
                             const isCompleted = (localStatus?.completed) || (cloudStatus?.completed) || false;
                             const observation = (localStatus?.observations) || (cloudStatus?.observations) || t.observations;
@@ -166,6 +157,12 @@ export default function DashboardPage() {
                             return t;
                         });
                     });
+
+                    // Update General Observations from Cloud if available
+                    if (data.generalObservations !== undefined) {
+                        setGeneralObservations(data.generalObservations);
+                    }
+
                     setSyncStatus('synced');
                     setDebugDocId(`${targetId} (OK: ${data.tasks ? Object.keys(data.tasks).length : 0} tasks)`);
                 } else {
@@ -202,7 +199,7 @@ export default function DashboardPage() {
                 unsubMorning();
             };
         }
-    }, [user?.username, isWorking]); // JAVIVASCO: Fixed dependency loop by using primitive string
+    }, [user?.username, isWorking]);
 
     const handleLogout = () => {
         localStorage.removeItem('currentUser');
@@ -288,11 +285,36 @@ export default function DashboardPage() {
         }
     };
 
+    // Handler for General Observations
+    const handleGeneralObservationsChange = async (value: string) => {
+        setGeneralObservations(value);
+
+        // SAVE TO LOCAL STORAGE
+        if (user && isWorking) {
+            const todayStr = getTodayDateString();
+            const localKeyObs = `offline_obs_${todayStr}_${user.username}`;
+            localStorage.setItem(localKeyObs, value);
+
+            setSyncStatus('syncing');
+            try {
+                // We don't wait for this one to simplify UI responsiveness for text input
+                updateGeneralObservations(todayStr, user.username, value)
+                    .then(() => setSyncStatus('synced'))
+                    .catch((e) => {
+                        console.error("Failed to sync general obs", e);
+                        setSyncStatus('error');
+                    });
+            } catch (e: any) {
+                console.error("Failed to sync general obs", e);
+                setSyncStatus('error');
+            }
+        }
+    };
+
     // Admin View Toggle
     const [viewMode, setViewMode] = useState<'employee' | 'admin'>('employee');
 
     // Calculate stats for current user
-    // Filter tasks based on shift!
     const filteredTasks = selectedShift
         ? tasks.filter(t => t.shift === selectedShift)
         : [];
@@ -342,13 +364,11 @@ export default function DashboardPage() {
         return (
             <main className="dashboard-page">
                 <header className="dashboard-header">
-                    {/* Simplified Header for Admin View */}
                     <div className="header-content">
                         <div className="header-info">
                             <h1 className="header-title">Panel de Administración</h1>
                         </div>
                         <div className="header-actions">
-                            {/* Toggle Button */}
                             {isWorking && (
                                 <button onClick={() => setViewMode('employee')} className="header-link" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary)' }}>
                                     ← Ir a mis tareas
@@ -369,7 +389,6 @@ export default function DashboardPage() {
                         onClose={() => setShowPasswordModal(false)}
                         onSuccess={() => {
                             setShowPasswordModal(false);
-                            // Optional: Show a toast/alert
                             alert('Contraseña actualizada correctamente');
                         }}
                     />
@@ -423,21 +442,9 @@ export default function DashboardPage() {
                             alert('Contraseña actualizada correctamente');
                         }}
                     />
-                )
-                }
+                )}
             </main >
         );
-    }
-
-    // Fallback for Admin who isn't working but is in 'employee' mode inadvertently?
-    // Reset to admin if not working and admin
-    if (isAdmin && !isWorking && viewMode === 'employee') {
-        // Force admin mode? better to handle in effect, but here works for render
-        // Actually, if they are admin, they can see admin interface.
-        // Let's just show Admin interface above if not working.
-        // But the condition above handles (isAdmin && viewMode === 'admin').
-        // So here we are if isAdmin && viewMode === 'employee' && !isWorking.
-        // Just show "Not Working" with a button to go back to Admin.
     }
 
     return (
@@ -660,7 +667,7 @@ export default function DashboardPage() {
 
                                 {morningObservations.length > 0 && (
                                     <div className="morning-observations-section">
-                                        <h4 className="morning-observations-title">Observaciones</h4>
+                                        <h4 className="morning-observations-title">Observaciones Tareas</h4>
                                         <ul className="morning-observations-list">
                                             {morningObservations.map((obs, idx) => (
                                                 <li key={idx} className="morning-observation-item">
@@ -668,6 +675,15 @@ export default function DashboardPage() {
                                                 </li>
                                             ))}
                                         </ul>
+                                    </div>
+                                )}
+
+                                {morningLog?.generalObservations && (
+                                    <div className="morning-observations-section" style={{ marginTop: '1rem', borderTop: '1px solid #e5e7eb', paddingTop: '0.75rem' }}>
+                                        <h4 className="morning-observations-title">📢 Observaciones Generales</h4>
+                                        <p style={{ fontSize: '0.9rem', color: '#374151', lineHeight: '1.5', whiteSpace: 'pre-line' }}>
+                                            {morningLog.generalObservations}
+                                        </p>
                                     </div>
                                 )}
                             </div>
@@ -706,6 +722,100 @@ export default function DashboardPage() {
                             </div>
                         )}
 
+                        {/* General Observations Section */}
+                        <div className="general-observations-section">
+                            <h3 className="general-observations-title">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                Observaciones Generales del Día
+                            </h3>
+                            <div className="obs-actions-group">
+                                <textarea
+                                    value={generalObservations}
+                                    onChange={(e) => handleGeneralObservationsChange(e.target.value)}
+                                    placeholder="Escribe aquí cualquier incidencia general, notas para el siguiente turno, o comentarios libres..."
+                                    className="general-observations-input"
+                                />
+                                <button
+                                    onClick={() => setShowInstructionsModal(true)}
+                                    className="instructions-trigger-button"
+                                    title="Ver cómo sacar listados"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                    Sacar 14 days y seguimiento
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Instructions Modal */}
+                        {showInstructionsModal && (
+                            <div className="modal-overlay" onClick={() => setShowInstructionsModal(false)}>
+                                <div className="modal-content instructions-modal" onClick={e => e.stopPropagation()}>
+                                    <div className="modal-header">
+                                        <h3>Guía de Extracción de Listados</h3>
+                                        <button className="close-modal" onClick={() => setShowInstructionsModal(false)}>×</button>
+                                    </div>
+                                    <div className="instructions-body">
+                                        <div className="instruction-section">
+                                            <h4>📋 Listado 14 Days</h4>
+                                            <ol>
+                                                <li>Ir a la página de <strong>Inicio</strong> de AimHarder.</li>
+                                                <li>Buscar el KPI llamado <strong>"Clientes sin reserva"</strong>.</li>
+                                                <li>En el primer desplegable de ese cuadro, marcar: <strong>"Mostrar bonos agotados"</strong>.</li>
+                                                <li>Ordenar por fecha pulsando en azul donde pone: <strong>"Última reserva"</strong>.</li>
+                                                <li>Saldrán en primer lugar los que llevan justamente <strong>14 días</strong> sin reservar; añádelos al listado.</li>
+
+                                                <div className="color-guide-box">
+                                                    <span className="color-guide-title">🎨 Guía de Colores por Situación:</span>
+                                                    <ul className="color-guide-list">
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-yellow"></span>
+                                                            <span><strong>Amarillo:</strong> No contesta ni a la llamada ni al whatsapp.</span>
+                                                        </li>
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-orange"></span>
+                                                            <span><strong>Naranja:</strong> Contestan con información (qué les pasa y cuándo pueden volver). Marcar fecha de vuelta. (Solo si hay esta información, de lo contrario amarillo).</span>
+                                                        </li>
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-green"></span>
+                                                            <span><strong>Verde:</strong> Ya ha reservado y <strong>ha venido</strong> a entrenar (no solo reservar).</span>
+                                                        </li>
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-blue"></span>
+                                                            <span><strong>Azul:</strong> Alumno del grupo de natación.</span>
+                                                        </li>
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-violet"></span>
+                                                            <span><strong>Violeta:</strong> Alumno del grupo de seniors.</span>
+                                                        </li>
+                                                        <li className="color-guide-item">
+                                                            <span className="color-swatch swatch-red"></span>
+                                                            <span><strong>Rojo:</strong> Alumno comunica que no va a seguir entrenando (**Baja**).</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+
+                                                <li><em>Paso adicional:</em> Revisar los días anexos para comprobar que no se haya pasado ningún alumno.</li>
+                                            </ol>
+                                        </div>
+
+                                        <div className="instruction-section">
+                                            <h4>👥 Lista de Seguimiento</h4>
+                                            <ol>
+                                                <li>Ir a la pestaña de <strong>"Informes"</strong>.</li>
+                                                <li>Ir al KPI <strong>"Nuevos clientes"</strong>.</li>
+                                                <li>Seleccionar la fecha de <strong>ayer</strong>.</li>
+                                                <li>Marcar los campos: <strong>Nombre y Apellidos</strong> y <strong>Fecha de alta</strong>.</li>
+                                                <li>Pulsar el botón <strong>"Generar informes"</strong>.</li>
+                                            </ol>
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button className="button-primary" onClick={() => setShowInstructionsModal(false)}>Entendido</button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="whatsapp-section">
                             <button
                                 onClick={() => {
@@ -717,15 +827,15 @@ export default function DashboardPage() {
                                     const pending = filteredTasks.filter(t => !t.completed);
                                     const obsList = filteredTasks.filter(t => t.observations && t.observations.trim().length > 0);
 
-                                    // Simplified Header
-                                    let message = `� *${user?.name}* | 📅 ${dateStr} | ${shiftLabel}\n\n`;
+                                    // Improved Headers and formatting
+                                    let message = `📝 *${user?.name}* | 📅 ${dateStr} | ${shiftLabel}\n\n`;
 
                                     message += `✅ *Completadas:* ${completedTasks}/${totalTasks}\n\n`;
 
                                     if (pending.length > 0) {
                                         message += `⚠️ *Pendientes:*\n`;
-                                        pending.forEach(t => {
-                                            message += `- ${t.title}\n`;
+                                        pending.forEach((t: Task) => {
+                                            message += `• ${t.title}\n`;
                                         });
                                         message += `\n`;
                                     } else {
@@ -735,21 +845,42 @@ export default function DashboardPage() {
                                     // Shopping List Section
                                     if (shoppingList.length > 0) {
                                         message += `🛒 *Falta comprar:*\n`;
-                                        shoppingList.forEach(item => {
-                                            message += `- ${item}\n`;
+                                        shoppingList.forEach((item: string) => {
+                                            message += `• ${item}\n`;
                                         });
                                         message += `\n`;
                                     }
 
                                     if (obsList.length > 0) {
-                                        message += `📝 *Observaciones:*\n`;
-                                        obsList.forEach(t => {
-                                            message += `- *${t.title}:* ${t.observations}\n`;
+                                        message += `📌 *Observaciones Tareas:*\n\n`;
+                                        obsList.forEach((t: Task) => {
+                                            message += `• *${t.title}:*\n`;
+                                            // Split observations by newline to handle indentation correctly
+                                            const lines = t.observations!.split('\n');
+                                            lines.forEach((line: string) => {
+                                                if (line.trim().length > 0) {
+                                                    message += `  ${line}\n`;
+                                                }
+                                            });
+                                            message += `\n`;
                                         });
                                     }
 
+                                    if (generalObservations.trim().length > 0) {
+                                        message += `📢 *Observaciones Generales:*\n`;
+                                        // Handle indentation for general observations too
+                                        const gLines = generalObservations.split('\n');
+                                        gLines.forEach((line: string) => {
+                                            if (line.trim().length > 0) {
+                                                message += `  ${line}\n`;
+                                            }
+                                        });
+                                        message += `\n`;
+                                    }
+
                                     const encodedMessage = encodeURIComponent(message);
-                                    window.open(`https://wa.me/34618289708?text=${encodedMessage}`, '_blank');
+                                    // Abrir selector de WhatsApp para elegir grupo o contacto
+                                    window.open(`https://api.whatsapp.com/send?text=${encodedMessage}`, '_blank');
                                 }}
                                 className="whatsapp-button"
                             >
@@ -760,12 +891,12 @@ export default function DashboardPage() {
                                 Enviar Reporte por WhatsApp
                             </button>
                         </div>
-                    </div> {/* Close dashboard-tasks-main */}
+                    </div>
 
                     <aside className="dashboard-sidebar">
                         <ShoppingBlackboard onSyncStatusChange={setSyncStatus} />
                     </aside>
-                </div> {/* Close dashboard-layout */}
+                </div>
 
                 {/* Debug Footer Removed for Production */
                 /* <div style={{ marginTop: '2rem', padding: '1rem', borderTop: '1px solid #e5e7eb', color: '#9ca3af', fontSize: '0.75rem', textAlign: 'center' }}>

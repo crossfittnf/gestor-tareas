@@ -13,29 +13,29 @@ export interface WeeklySchedule {
     [username: string]: EmployeeSchedule;
 }
 
-// Current week schedule (Updated by User Request)
+// Current week schedule (Updated by User Request: 2026-02-08)
 export const WEEKLY_SCHEDULE: WeeklySchedule = {
     'Javivasco': {
         'monday': 'morning',
         'tuesday': null,
         'wednesday': 'morning',
         'thursday': null,
-        'friday': 'morning',
+        'friday': null,
         'saturday': null,
         'sunday': null,
     },
     'Ivan': {
-        'monday': null,
+        'monday': 'afternoon',
         'tuesday': 'morning',
         'wednesday': 'afternoon',
         'thursday': 'morning',
-        'friday': 'afternoon',
+        'friday': 'morning',
         'saturday': null,
         'sunday': 'full-day',
     },
     'Andres': {
         'monday': null,
-        'tuesday': 'afternoon',
+        'tuesday': null,
         'wednesday': null,
         'thursday': null,
         'friday': null,
@@ -43,11 +43,20 @@ export const WEEKLY_SCHEDULE: WeeklySchedule = {
         'sunday': null,
     },
     'Cristina': {
-        'monday': 'afternoon',
+        'monday': null,
         'tuesday': null,
         'wednesday': null,
-        'thursday': 'afternoon',
+        'thursday': null,
         'friday': null,
+        'saturday': null,
+        'sunday': null,
+    },
+    'Aisha': {
+        'monday': null,
+        'tuesday': 'afternoon',
+        'wednesday': null,
+        'thursday': 'afternoon',
+        'friday': 'afternoon',
         'saturday': 'full-day',
         'sunday': null,
     },
