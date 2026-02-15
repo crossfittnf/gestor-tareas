@@ -1,5 +1,5 @@
 import { Task, MOCK_TASKS, ShiftType, MOCK_USERS } from './mockData';
-import { WEEKLY_SCHEDULE, DayOfWeek, getUserShiftForDay } from './scheduleData';
+import { DayOfWeek, getUserShiftForDay } from './scheduleData';
 
 // Helper to get day name from date string
 function getDayName(dateStr: string): DayOfWeek {
@@ -17,7 +17,7 @@ interface StoredTaskState {
 export function getTasksForDateAndUser(date: string, username: string): Task[] {
     // 1. Determine if user works on this day
     const dayName = getDayName(date);
-    const scheduledShift = getUserShiftForDay(username, dayName);
+    const scheduledShift = getUserShiftForDay(username, dayName, new Date(date));
 
     if (!scheduledShift) {
         return [];

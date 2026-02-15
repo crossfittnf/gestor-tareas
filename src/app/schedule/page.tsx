@@ -1,11 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
-import { WEEKLY_SCHEDULE } from '@/lib/scheduleData';
+import { getWeeklyScheduleForDate } from '@/lib/scheduleData';
 import { MOCK_USERS } from '@/lib/mockData';
 import './schedule.css';
 
-// Employee colors
 // Employee colors
 const EMPLOYEE_COLORS: Record<string, string> = {
     'javivasco': '#FFB84D',  // Orange (100%)
@@ -32,13 +32,26 @@ const DAYS = [
 ];
 
 export default function SchedulePage() {
+    const [selectedDate, setSelectedDate] = useState(new Date());
+
+    // Helper to get the start of the week (Monday) for any given date
+    const getStartOfWeek = (date: Date) => {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+        return new Date(d.setDate(diff));
+    };
+
+    const startOfWeek = getStartOfWeek(selectedDate);
+
     // Get employees for a specific shift on a specific day
     const getEmployeesForShift = (day: string, shiftId: string) => {
         const employees = [];
         const isWeekend = day === 'saturday' || day === 'sunday';
+        const weeklySchedule = getWeeklyScheduleForDate(selectedDate);
 
         for (const user of MOCK_USERS) {
-            const userSchedule = WEEKLY_SCHEDULE[user.username];
+            const userSchedule = weeklySchedule[user.username];
             if (!userSchedule) continue;
 
             const dayShift = userSchedule[day as keyof typeof userSchedule];
@@ -82,7 +95,15 @@ export default function SchedulePage() {
                         </svg>
                         Volver
                     </Link>
-                    <h1 className="schedule-title">Horario Semanal - Recepción</h1>
+                    <h1 className="schedule-title">Horario Semanal</h1>
+                    <div className="date-selector">
+                        <input
+                            type="date"
+                            value={selectedDate.toISOString().split('T')[0]}
+                            onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                            className="date-input"
+                        />
+                    </div>
                 </div>
             </header>
 
@@ -93,21 +114,9 @@ export default function SchedulePage() {
                             <tr>
                                 {/* Removed Shift Column Header */}
                                 {DAYS.map(day => {
-                                    // Calculate date for this day of the CURRENT week
-                                    // Start with a new Date object (today)
-                                    const today = new Date();
-                                    const currentDay = today.getDay(); // 0 = sun, 1 = mon...
-                                    // Normalize sunday to 7 for simpler math (Mon=1 ... Sun=7)
-                                    const currentDayIndex = currentDay === 0 ? 7 : currentDay;
-
-                                    // Map DAYS array (0=Monday ... 6=Sunday) to 1-7
-                                    // Our DAYS array starts at Monday=0 index
-                                    const targetDayIndex = DAYS.indexOf(day) + 1;
-
-                                    const diff = targetDayIndex - currentDayIndex;
-
-                                    const targetDate = new Date(today);
-                                    targetDate.setDate(today.getDate() + diff);
+                                    // Calculate date for this day of the SELECTED week
+                                    const targetDate = new Date(startOfWeek);
+                                    targetDate.setDate(startOfWeek.getDate() + DAYS.indexOf(day));
 
                                     const dateStr = targetDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
@@ -127,14 +136,9 @@ export default function SchedulePage() {
                                 <tr key={shift.id}>
                                     {/* Removed Shift Label Cell */}
                                     {DAYS.map(day => {
-                                        // Check if this specific day is the Feb 2nd holiday
-                                        const today = new Date();
-                                        const currentDay = today.getDay();
-                                        const currentDayIndex = currentDay === 0 ? 7 : currentDay;
-                                        const targetDayIndex = DAYS.indexOf(day) + 1;
-                                        const diff = targetDayIndex - currentDayIndex;
-                                        const targetDate = new Date(today);
-                                        targetDate.setDate(today.getDate() + diff);
+                                        // Calculate date for this day of the SELECTED week
+                                        const targetDate = new Date(startOfWeek);
+                                        targetDate.setDate(startOfWeek.getDate() + DAYS.indexOf(day));
                                         const isHolidayToday = targetDate.toLocaleDateString('sv-SE') === '2026-02-02';
 
                                         // For afternoon row, disable weekend cells and holidays
