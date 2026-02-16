@@ -82,6 +82,24 @@ export const SCHEDULES_BY_WEEK: Record<string, WeeklySchedule> = {
         'Aisha': {
             'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': null, 'sunday': 'full-day',
         },
+    },
+    // Nueva semana (A partir del 16 de Feb)
+    '2026-02-16': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
     }
 };
 
