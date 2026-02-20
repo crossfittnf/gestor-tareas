@@ -89,7 +89,7 @@ export const SCHEDULES_BY_WEEK: Record<string, WeeklySchedule> = {
             'monday': 'morning', 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
         },
         'Ivan': {
-            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': null,
         },
         'Andres': {
             'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
@@ -98,7 +98,7 @@ export const SCHEDULES_BY_WEEK: Record<string, WeeklySchedule> = {
             'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
         },
         'Aisha': {
-            'monday': null, 'tuesday': null, 'wednesday': 'morning', 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+            'monday': null, 'tuesday': null, 'wednesday': 'morning', 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': 'full-day',
         },
     }
 };
