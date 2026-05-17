@@ -100,6 +100,240 @@ export const SCHEDULES_BY_WEEK: Record<string, WeeklySchedule> = {
         'Aisha': {
             'monday': null, 'tuesday': null, 'wednesday': 'morning', 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': 'full-day',
         },
+    },
+    // Semana del 23 de Febrero (Nueva Imagen)
+    '2026-02-23': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': null,
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': 'full-day',
+        },
+    },
+    // Semana del 2 de Marzo
+    '2026-03-02': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana de Marzo (A partir del 9 de Marzo)
+    '2026-03-09': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana de Marzo (A partir del 16 de Marzo - Imagen Actual)
+    '2026-03-16': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': 'full-day',
+        },
+    },
+    // Semana Actual (A partir del 23 de Marzo)
+    '2026-03-23': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Próxima Semana (A partir del 30 de Marzo)
+    '2026-03-30': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': null,
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': 'full-day', 'sunday': 'full-day',
+        },
+    },
+    // Semana del 6 de Abril (Imagen enviada por el usuario)
+    '2026-04-06': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Próxima Semana (A partir del 13 de Abril)
+    '2026-04-13': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'afternoon', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': null,
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'morning', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': 'full-day',
+        },
+    },
+    // Próxima Semana (A partir del 20 de Abril)
+    '2026-04-20': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana Actual (A partir del 27 de Abril)
+    '2026-04-27': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': null, 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana del 4 de Mayo
+    '2026-05-04': {
+        'Javivasco': {
+            'monday': null, 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'morning', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana del 11 de Mayo
+    '2026-05-11': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
+    },
+    // Semana del 18 de Mayo
+    '2026-05-18': {
+        'Javivasco': {
+            'monday': 'morning', 'tuesday': null, 'wednesday': 'morning', 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Ivan': {
+            'monday': 'afternoon', 'tuesday': 'morning', 'wednesday': 'afternoon', 'thursday': 'morning', 'friday': 'morning', 'saturday': null, 'sunday': 'full-day',
+        },
+        'Andres': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Cristina': {
+            'monday': null, 'tuesday': null, 'wednesday': null, 'thursday': null, 'friday': null, 'saturday': null, 'sunday': null,
+        },
+        'Aisha': {
+            'monday': null, 'tuesday': 'afternoon', 'wednesday': null, 'thursday': 'afternoon', 'friday': 'afternoon', 'saturday': 'full-day', 'sunday': null,
+        },
     }
 };
 
