@@ -1,4 +1,4 @@
-export type ShiftType = 'morning' | 'afternoon' | 'full-day';
+export type ShiftType = 'morning' | 'afternoon' | 'full-day' | 'apertura_corta' | 'apertura_larga' | 'intermedio_corto' | 'intermedio_largo' | 'cierre';
 
 export interface Task {
     id: string;
@@ -304,4 +304,9 @@ export const SHIFT_LABELS: Record<ShiftType, string> = {
     'morning': 'Turno de Mañana',
     'afternoon': 'Turno de Tarde',
     'full-day': 'Día Completo',
+    'apertura_corta': 'Apertura Corta',
+    'apertura_larga': 'Apertura Larga',
+    'intermedio_corto': 'Intermedio Corto',
+    'intermedio_largo': 'Intermedio Largo',
+    'cierre': 'Cierre'
 };
