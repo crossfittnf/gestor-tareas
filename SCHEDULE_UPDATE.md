@@ -19,9 +19,9 @@ Cada semana, guarda la nueva imagen del horario en la carpeta del proyecto para 
 
 Abre el archivo `src/lib/scheduleData.ts` en tu editor de código.
 
-### 3. Actualizar el Objeto WEEKLY_SCHEDULE
+### 3. Actualizar el Objeto SCHEDULES_BY_WEEK
 
-Busca el objeto `WEEKLY_SCHEDULE` y actualiza los turnos según la columna **"Recepción"** de la imagen del horario.
+Busca el objeto `SCHEDULES_BY_WEEK` y añade una nueva entrada para la semana actual o próxima, usando la fecha del lunes correspondiente (YYYY-MM-DD).
 
 **Reglas de interpretación:**
 
@@ -37,22 +37,25 @@ Busca el objeto `WEEKLY_SCHEDULE` y actualiza los turnos según la columna **"Re
 ### 4. Ejemplo de Actualización
 
 ```typescript
-export const WEEKLY_SCHEDULE: WeeklySchedule = {
-  'javivasco': {
-    'monday': 'morning',      // Javi Vasco trabaja lunes por la mañana
-    'tuesday': null,          // No trabaja martes
-    'wednesday': 'morning',   // Trabaja miércoles por la mañana
-    'thursday': null,         // No trabaja jueves
-    'friday': null,           // No trabaja viernes
-    'saturday': null,         // No trabaja sábado
-    'sunday': null,           // No trabaja domingo
-  },
-  'ivan': {
-    'monday': 'afternoon',    // Ivan trabaja lunes por la tarde
-    'tuesday': 'morning',     // Trabaja martes por la mañana
-    // ... continuar para cada día
-  },
-  // ... continuar para andres y cristina
+export const SCHEDULES_BY_WEEK: Record<string, WeeklySchedule> = {
+  // ... semanas anteriores
+  '2026-02-23': {
+    'Javivasco': {
+      'monday': 'morning',      // Javi Vasco trabaja lunes por la mañana
+      'tuesday': null,          // No trabaja martes
+      'wednesday': 'morning',   // Trabaja miércoles por la mañana
+      'thursday': null,          // No trabaja jueves
+      'friday': null,           // No trabaja viernes
+      'saturday': null,         // No trabaja sábado
+      'sunday': null,           // No trabaja domingo
+    },
+    'Ivan': {
+      'monday': 'afternoon',    // Ivan trabaja lunes por la tarde
+      'tuesday': 'morning',     // Trabaja martes por la mañana
+      // ... continuar para cada día
+    },
+    // ... continuar para todos los empleados (Andres, Cristina, Aisha)
+  }
 };
 ```
 
@@ -98,10 +101,10 @@ Los días se escriben en inglés y en minúsculas:
 
 La última imagen del horario procesada se encuentra en:
 ```
-/Users/jvascpin/.gemini/antigravity/brain/e6462122-7558-4518-831b-e52fb1b0aca6/uploaded_image_1764874747199.png
+/Users/jvascpin/.gemini/antigravity/brain/631272fc-f3c3-487c-9002-9181af7067dc/media__1779016599805.png
 ```
 
-![Horario Actual](/Users/jvascpin/.gemini/antigravity/brain/e6462122-7558-4518-831b-e52fb1b0aca6/uploaded_image_1764874747199.png)
+![Horario Actual](/Users/jvascpin/.gemini/antigravity/brain/631272fc-f3c3-487c-9002-9181af7067dc/media__1779016599805.png)
 
 ## Mejora Futura: OCR Automático
 
